@@ -1,15 +1,9 @@
-const express = require('express');
-const { authenticateToken } = require('../middlewares/auth');
-const { 
-  getAttendanceAnalytics, 
-  getScoresAnalytics, 
-  getAssignmentsAnalytics 
-} = require('../controllers/analyticsController');
 
+const express = require('express');
 const router = express.Router();
 
-router.get('/attendance', authenticateToken, getAttendanceAnalytics);
-router.get('/scores', authenticateToken, getScoresAnalytics);
-router.get('/assignments', authenticateToken, getAssignmentsAnalytics);
+router.get('/dashboard', (req, res) => {
+  res.json({ message: 'Analytics endpoint working' });
+});
 
 module.exports = router;

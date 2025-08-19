@@ -1,10 +1,9 @@
-const express = require('express');
-const { authenticateToken } = require('../middlewares/auth');
-const { getAttendance, updateAttendance } = require('../controllers/attendanceController');
 
+const express = require('express');
 const router = express.Router();
 
-router.get('/', authenticateToken, getAttendance);
-router.post('/', authenticateToken, updateAttendance);
+router.get('/summary', (req, res) => {
+  res.json({ message: 'Attendance endpoint working' });
+});
 
 module.exports = router;

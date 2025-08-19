@@ -1,12 +1,9 @@
-const express = require('express');
-const { authenticateToken } = require('../middlewares/auth');
-const { getExams, createExam, updateExam, deleteExam } = require('../controllers/examController');
 
+const express = require('express');
 const router = express.Router();
 
-router.get('/', authenticateToken, getExams);
-router.post('/', authenticateToken, createExam);
-router.put('/:examId', authenticateToken, updateExam);
-router.delete('/:examId', authenticateToken, deleteExam);
+router.get('/upcoming', (req, res) => {
+  res.json({ message: 'Exams endpoint working' });
+});
 
 module.exports = router;
