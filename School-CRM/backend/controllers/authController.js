@@ -1,27 +1,15 @@
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { generateOTP, verifyOTP } = require('../services/otpService');
-
-// In-memory user storage (replace with database in production)
-const users = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: '$2a$10$8K0p.qJX0xJ8j0fxRJ8jy.XhX2Q7nJo2k1z2X3YqF4G5H6I7J8K9L',
-    role: 'student'
-  }
-];
-
-const tempOTPs = new Map();
+const { generateOTP } = require('../services/otpService');
+const { createUser, findUserByEmail, storeOTP, verifyOTP } = require('../config/database');
 
 const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     // Check if user exists
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -29,20 +17,12 @@ const signup = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const newUser = {
-      id: users.length + 1,
-      name,
-      email,
-      password: hashedPassword,
-      role: 'student'
-    };
-
-    users.push(newUser);
+    // Create user in database
+    const newUser = await createUser(name, email, hashedPassword);
 
     res.status(201).json({ 
       message: 'User created successfully',
-      user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role }
+      user: newUser
     });
   } catch (error) {
     console.error('Signup error:', error);
@@ -55,14 +35,17 @@ const login = async (req, res) => {
     const { email } = req.body;
 
     // Check if user exists
-    const user = users.find(u => u.email === email);
+    const user = await findUserByEmail(email);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Generate OTP
     const otp = generateOTP();
-    tempOTPs.set(email, { otp, expires: Date.now() + 5 * 60 * 1000 }); // 5 minutes
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Store OTP in database
+    await storeOTP(email, otp, expiresAt);
 
     console.log(`OTP for ${email}: ${otp}`); // In development, log OTP
 
@@ -81,23 +64,16 @@ const verifyLogin = async (req, res) => {
     const { email, otp } = req.body;
 
     // Check if user exists
-    const user = users.find(u => u.email === email);
+    const user = await findUserByEmail(email);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     // Verify OTP
-    const otpData = tempOTPs.get(email);
-    if (!otpData || otpData.expires < Date.now()) {
-      return res.status(400).json({ error: 'OTP expired or invalid' });
+    const isValidOTP = await verifyOTP(email, otp);
+    if (!isValidOTP) {
+      return res.status(400).json({ error: 'Invalid or expired OTP' });
     }
-
-    if (otpData.otp !== otp) {
-      return res.status(400).json({ error: 'Invalid OTP' });
-    }
-
-    // Remove used OTP
-    tempOTPs.delete(email);
 
     // Generate JWT token
     const token = jwt.sign(
