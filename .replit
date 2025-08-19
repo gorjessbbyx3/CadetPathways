@@ -38,5 +38,23 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "School-CRM Backend"
+author = 46603630
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd School-CRM/backend && npm install && npm start"
+
+[[workflows.workflow]]
+name = "School-CRM Frontend"
+author = 46603630
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd School-CRM/frontend && npm install && npm run dev"
+
 [agent]
 integrations = ["javascript_database==1.0.0"]
