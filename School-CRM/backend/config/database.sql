@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS otp_storage (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert sample user
-INSERT INTO users (name, email, password, role) 
-VALUES ('John Doe', 'john@example.com', '$2a$10$8K0p.qJX0xJ8j0fxRJ8jy.XhX2Q7nJo2k1z2X3YqF4G5H6I7J8K9L', 'student')
-ON CONFLICT (email) DO NOTHING;
+-- Note: Sample user data should be created through environment variables or admin interface
+-- instead of hardcoded values for security reasons.
+-- Use the application's user registration or admin setup process to create initial users.
