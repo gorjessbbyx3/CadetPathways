@@ -1,120 +1,143 @@
-import { 
-  users, cadets, behaviorIncidents, fitnessAssessments, mentorships, 
-  developmentPlans, academicRecords, communications, parentGuardians,
-  academicSchedules, assignments, assignmentSubmissions, mockTests, 
-  mockTestAttempts, classDiaryEntries, feeRecords,
-  type User, type InsertUser, type Cadet, type InsertCadet,
-  type BehaviorIncident, type InsertBehaviorIncident,
-  type FitnessAssessment, type InsertFitnessAssessment,
-  type Mentorship, type InsertMentorship,
-  type DevelopmentPlan, type InsertDevelopmentPlan,
-  type AcademicRecord, type InsertAcademicRecord,
-  type Communication, type InsertCommunication,
-  type ParentGuardian, type InsertParentGuardian,
-  type AcademicSchedule, type InsertAcademicSchedule,
-  type Assignment, type InsertAssignment,
-  type AssignmentSubmission, type InsertAssignmentSubmission,
-  type MockTest, type InsertMockTest,
-  type MockTestAttempt, type InsertMockTestAttempt,
-  type ClassDiaryEntry, type InsertClassDiaryEntry,
-  type FeeRecord, type InsertFeeRecord
-} from "@shared/schema";
+
 import { db } from "./db";
-import { eq, desc, and, like, sql, count } from "drizzle-orm";
+import { eq, desc, and, count, sql } from "drizzle-orm";
+import {
+  users,
+  cadets,
+  behaviorIncidents,
+  fitnessAssessments,
+  mentorships,
+  developmentPlans,
+  academicRecords,
+  communications,
+  parentGuardians,
+  academicSchedules,
+  assignments,
+  assignmentSubmissions,
+  mockTests,
+  mockTestAttempts,
+  classDiaryEntries,
+  feeRecords,
+  type User,
+  type InsertUser,
+  type Cadet,
+  type InsertCadet,
+  type BehaviorIncident,
+  type InsertBehaviorIncident,
+  type FitnessAssessment,
+  type InsertFitnessAssessment,
+  type Mentorship,
+  type InsertMentorship,
+  type DevelopmentPlan,
+  type InsertDevelopmentPlan,
+  type AcademicRecord,
+  type InsertAcademicRecord,
+  type Communication,
+  type InsertCommunication,
+  type ParentGuardian,
+  type InsertParentGuardian,
+  type AcademicSchedule,
+  type InsertAcademicSchedule,
+  type Assignment,
+  type InsertAssignment,
+  type AssignmentSubmission,
+  type InsertAssignmentSubmission,
+  type MockTest,
+  type InsertMockTest,
+  type MockTestAttempt,
+  type InsertMockTestAttempt,
+  type ClassDiaryEntry,
+  type InsertClassDiaryEntry,
+  type FeeRecord,
+  type InsertFeeRecord,
+} from "@shared/schema";
 
 export interface IStorage {
   // User management
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  updateUser(id: string, user: Partial<InsertUser>): Promise<User>;
-  getAllStaff(): Promise<User[]>;
-
+  createUser(insertUser: InsertUser): Promise<User>;
+  updateUser(id: string, insertUser: Partial<InsertUser>): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  
   // Cadet management
   getCadet(id: number): Promise<Cadet | undefined>;
-  createCadet(cadet: InsertCadet): Promise<Cadet>;
-  updateCadet(id: number, cadet: Partial<InsertCadet>): Promise<Cadet>;
+  createCadet(insertCadet: InsertCadet): Promise<Cadet>;
+  updateCadet(id: number, insertCadet: Partial<InsertCadet>): Promise<Cadet>;
   getAllCadets(): Promise<Cadet[]>;
-  searchCadets(query: string): Promise<Cadet[]>;
   getCadetsByStatus(status: string): Promise<Cadet[]>;
-
+  
   // Behavior incidents
   getBehaviorIncident(id: number): Promise<BehaviorIncident | undefined>;
-  createBehaviorIncident(incident: InsertBehaviorIncident): Promise<BehaviorIncident>;
-  updateBehaviorIncident(id: number, incident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident>;
+  createBehaviorIncident(insertIncident: InsertBehaviorIncident): Promise<BehaviorIncident>;
+  updateBehaviorIncident(id: number, insertIncident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident>;
   getBehaviorIncidentsByCadet(cadetId: number): Promise<BehaviorIncident[]>;
   getRecentBehaviorIncidents(limit?: number): Promise<BehaviorIncident[]>;
 
   // Fitness assessments
   getFitnessAssessment(id: number): Promise<FitnessAssessment | undefined>;
-  createFitnessAssessment(assessment: InsertFitnessAssessment): Promise<FitnessAssessment>;
-  updateFitnessAssessment(id: number, assessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment>;
+  createFitnessAssessment(insertAssessment: InsertFitnessAssessment): Promise<FitnessAssessment>;
+  updateFitnessAssessment(id: number, insertAssessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment>;
   getFitnessAssessmentsByCadet(cadetId: number): Promise<FitnessAssessment[]>;
-  getLatestFitnessAssessmentByCadet(cadetId: number): Promise<FitnessAssessment | undefined>;
 
   // Mentorships
   getMentorship(id: number): Promise<Mentorship | undefined>;
-  createMentorship(mentorship: InsertMentorship): Promise<Mentorship>;
-  updateMentorship(id: number, mentorship: Partial<InsertMentorship>): Promise<Mentorship>;
-  getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]>;
+  createMentorship(insertMentorship: InsertMentorship): Promise<Mentorship>;
+  updateMentorship(id: number, insertMentorship: Partial<InsertMentorship>): Promise<Mentorship>;
   getMentorshipsByMentor(mentorId: string): Promise<Mentorship[]>;
-  getActiveMentorships(): Promise<Mentorship[]>;
+  getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]>;
 
   // Development plans
   getDevelopmentPlan(id: number): Promise<DevelopmentPlan | undefined>;
-  createDevelopmentPlan(plan: InsertDevelopmentPlan): Promise<DevelopmentPlan>;
-  updateDevelopmentPlan(id: number, plan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan>;
-  getDevelopmentPlanByCadet(cadetId: number): Promise<DevelopmentPlan | undefined>;
+  createDevelopmentPlan(insertPlan: InsertDevelopmentPlan): Promise<DevelopmentPlan>;
+  updateDevelopmentPlan(id: number, insertPlan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan>;
+  getDevelopmentPlansByCadet(cadetId: number): Promise<DevelopmentPlan[]>;
 
   // Academic records
   getAcademicRecord(id: number): Promise<AcademicRecord | undefined>;
-  createAcademicRecord(record: InsertAcademicRecord): Promise<AcademicRecord>;
-  updateAcademicRecord(id: number, record: Partial<InsertAcademicRecord>): Promise<AcademicRecord>;
+  createAcademicRecord(insertRecord: InsertAcademicRecord): Promise<AcademicRecord>;
+  updateAcademicRecord(id: number, insertRecord: Partial<InsertAcademicRecord>): Promise<AcademicRecord>;
   getAcademicRecordsByCadet(cadetId: number): Promise<AcademicRecord[]>;
 
   // Communications
   getCommunication(id: number): Promise<Communication | undefined>;
-  createCommunication(communication: InsertCommunication): Promise<Communication>;
+  createCommunication(insertCommunication: InsertCommunication): Promise<Communication>;
   getRecentCommunications(limit?: number): Promise<Communication[]>;
 
   // Parent/Guardian relationships
   getParentGuardian(id: number): Promise<ParentGuardian | undefined>;
-  createParentGuardian(parentGuardian: InsertParentGuardian): Promise<ParentGuardian>;
+  createParentGuardian(insertParentGuardian: InsertParentGuardian): Promise<ParentGuardian>;
   getParentGuardiansByCadet(cadetId: number): Promise<ParentGuardian[]>;
 
-  // Academic schedules/timetables
+  // Academic schedules
   getAcademicSchedule(id: number): Promise<AcademicSchedule | undefined>;
-  createAcademicSchedule(schedule: InsertAcademicSchedule): Promise<AcademicSchedule>;
-  updateAcademicSchedule(id: number, schedule: Partial<InsertAcademicSchedule>): Promise<AcademicSchedule>;
+  createAcademicSchedule(insertSchedule: InsertAcademicSchedule): Promise<AcademicSchedule>;
+  updateAcademicSchedule(id: number, insertSchedule: Partial<InsertAcademicSchedule>): Promise<AcademicSchedule>;
   getAcademicSchedulesByCadet(cadetId: number): Promise<AcademicSchedule[]>;
-  getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]>;
 
   // Assignments
   getAssignment(id: number): Promise<Assignment | undefined>;
-  createAssignment(assignment: InsertAssignment): Promise<Assignment>;
-  updateAssignment(id: number, assignment: Partial<InsertAssignment>): Promise<Assignment>;
-  getAllAssignments(): Promise<Assignment[]>;
+  createAssignment(insertAssignment: InsertAssignment): Promise<Assignment>;
+  updateAssignment(id: number, insertAssignment: Partial<InsertAssignment>): Promise<Assignment>;
   getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]>;
-  getAssignmentsByCadet(cadetId: number): Promise<Assignment[]>;
 
   // Assignment submissions
   getAssignmentSubmission(id: number): Promise<AssignmentSubmission | undefined>;
-  createAssignmentSubmission(submission: InsertAssignmentSubmission): Promise<AssignmentSubmission>;
-  updateAssignmentSubmission(id: number, submission: Partial<InsertAssignmentSubmission>): Promise<AssignmentSubmission>;
+  createAssignmentSubmission(insertSubmission: InsertAssignmentSubmission): Promise<AssignmentSubmission>;
+  updateAssignmentSubmission(id: number, insertSubmission: Partial<InsertAssignmentSubmission>): Promise<AssignmentSubmission>;
   getAssignmentSubmissionsByAssignment(assignmentId: number): Promise<AssignmentSubmission[]>;
   getAssignmentSubmissionsByCadet(cadetId: number): Promise<AssignmentSubmission[]>;
 
   // Mock tests
   getMockTest(id: number): Promise<MockTest | undefined>;
-  createMockTest(test: InsertMockTest): Promise<MockTest>;
-  updateMockTest(id: number, test: Partial<InsertMockTest>): Promise<MockTest>;
-  getAllMockTests(): Promise<MockTest[]>;
+  createMockTest(insertTest: InsertMockTest): Promise<MockTest>;
+  updateMockTest(id: number, insertTest: Partial<InsertMockTest>): Promise<MockTest>;
   getMockTestsByInstructor(instructorId: string): Promise<MockTest[]>;
   getActiveMockTests(): Promise<MockTest[]>;
 
   // Mock test attempts
   getMockTestAttempt(id: number): Promise<MockTestAttempt | undefined>;
-  createMockTestAttempt(attempt: InsertMockTestAttempt): Promise<MockTestAttempt>;
+  createMockTestAttempt(insertAttempt: InsertMockTestAttempt): Promise<MockTestAttempt>;
   getMockTestAttemptsByTest(testId: number): Promise<MockTestAttempt[]>;
   getMockTestAttemptsByCadet(cadetId: number): Promise<MockTestAttempt[]>;
 
@@ -163,12 +186,12 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getAllStaff(): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.isActive, true));
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
   }
 
   // Cadet management
-  async getCadet(id: string): Promise<Cadet | undefined> {
+  async getCadet(id: number): Promise<Cadet | undefined> {
     const [cadet] = await db.select().from(cadets).where(eq(cadets.id, id));
     return cadet || undefined;
   }
@@ -178,22 +201,13 @@ export class DatabaseStorage implements IStorage {
     return cadet;
   }
 
-  async updateCadet(id: string, insertCadet: Partial<InsertCadet>): Promise<Cadet> {
-    const [cadet] = await db.update(cadets).set({
-      ...insertCadet,
-      updatedAt: new Date()
-    }).where(eq(cadets.id, id)).returning();
+  async updateCadet(id: number, insertCadet: Partial<InsertCadet>): Promise<Cadet> {
+    const [cadet] = await db.update(cadets).set(insertCadet).where(eq(cadets.id, id)).returning();
     return cadet;
   }
 
   async getAllCadets(): Promise<Cadet[]> {
-    return await db.select().from(cadets).orderBy(desc(cadets.createdAt));
-  }
-
-  async searchCadets(query: string): Promise<Cadet[]> {
-    return await db.select().from(cadets).where(
-      sql`${cadets.firstName} ILIKE ${`%${query}%`} OR ${cadets.lastName} ILIKE ${`%${query}%`}`
-    );
+    return await db.select().from(cadets);
   }
 
   async getCadetsByStatus(status: string): Promise<Cadet[]> {
@@ -201,7 +215,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Behavior incidents
-  async getBehaviorIncident(id: string): Promise<BehaviorIncident | undefined> {
+  async getBehaviorIncident(id: number): Promise<BehaviorIncident | undefined> {
     const [incident] = await db.select().from(behaviorIncidents).where(eq(behaviorIncidents.id, id));
     return incident || undefined;
   }
@@ -211,12 +225,12 @@ export class DatabaseStorage implements IStorage {
     return incident;
   }
 
-  async updateBehaviorIncident(id: string, insertIncident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident> {
+  async updateBehaviorIncident(id: number, insertIncident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident> {
     const [incident] = await db.update(behaviorIncidents).set(insertIncident).where(eq(behaviorIncidents.id, id)).returning();
     return incident;
   }
 
-  async getBehaviorIncidentsByCadet(cadetId: string): Promise<BehaviorIncident[]> {
+  async getBehaviorIncidentsByCadet(cadetId: number): Promise<BehaviorIncident[]> {
     return await db.select().from(behaviorIncidents).where(eq(behaviorIncidents.cadetId, cadetId)).orderBy(desc(behaviorIncidents.dateOccurred));
   }
 
@@ -225,7 +239,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Fitness assessments
-  async getFitnessAssessment(id: string): Promise<FitnessAssessment | undefined> {
+  async getFitnessAssessment(id: number): Promise<FitnessAssessment | undefined> {
     const [assessment] = await db.select().from(fitnessAssessments).where(eq(fitnessAssessments.id, id));
     return assessment || undefined;
   }
@@ -235,22 +249,17 @@ export class DatabaseStorage implements IStorage {
     return assessment;
   }
 
-  async updateFitnessAssessment(id: string, insertAssessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment> {
+  async updateFitnessAssessment(id: number, insertAssessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment> {
     const [assessment] = await db.update(fitnessAssessments).set(insertAssessment).where(eq(fitnessAssessments.id, id)).returning();
     return assessment;
   }
 
-  async getFitnessAssessmentsByCadet(cadetId: string): Promise<FitnessAssessment[]> {
+  async getFitnessAssessmentsByCadet(cadetId: number): Promise<FitnessAssessment[]> {
     return await db.select().from(fitnessAssessments).where(eq(fitnessAssessments.cadetId, cadetId)).orderBy(desc(fitnessAssessments.assessmentDate));
   }
 
-  async getLatestFitnessAssessmentByCadet(cadetId: string): Promise<FitnessAssessment | undefined> {
-    const [assessment] = await db.select().from(fitnessAssessments).where(eq(fitnessAssessments.cadetId, cadetId)).orderBy(desc(fitnessAssessments.assessmentDate)).limit(1);
-    return assessment || undefined;
-  }
-
   // Mentorships
-  async getMentorship(id: string): Promise<Mentorship | undefined> {
+  async getMentorship(id: number): Promise<Mentorship | undefined> {
     const [mentorship] = await db.select().from(mentorships).where(eq(mentorships.id, id));
     return mentorship || undefined;
   }
@@ -260,25 +269,21 @@ export class DatabaseStorage implements IStorage {
     return mentorship;
   }
 
-  async updateMentorship(id: string, insertMentorship: Partial<InsertMentorship>): Promise<Mentorship> {
+  async updateMentorship(id: number, insertMentorship: Partial<InsertMentorship>): Promise<Mentorship> {
     const [mentorship] = await db.update(mentorships).set(insertMentorship).where(eq(mentorships.id, id)).returning();
     return mentorship;
   }
 
-  async getMentorshipsByCadet(cadetId: string): Promise<Mentorship[]> {
-    return await db.select().from(mentorships).where(eq(mentorships.cadetId, cadetId)).orderBy(desc(mentorships.startDate));
-  }
-
   async getMentorshipsByMentor(mentorId: string): Promise<Mentorship[]> {
-    return await db.select().from(mentorships).where(eq(mentorships.mentorId, mentorId)).orderBy(desc(mentorships.startDate));
+    return await db.select().from(mentorships).where(eq(mentorships.mentorId, mentorId));
   }
 
-  async getActiveMentorships(): Promise<Mentorship[]> {
-    return await db.select().from(mentorships).where(eq(mentorships.status, 'active'));
+  async getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]> {
+    return await db.select().from(mentorships).where(eq(mentorships.cadetId, cadetId));
   }
 
   // Development plans
-  async getDevelopmentPlan(id: string): Promise<DevelopmentPlan | undefined> {
+  async getDevelopmentPlan(id: number): Promise<DevelopmentPlan | undefined> {
     const [plan] = await db.select().from(developmentPlans).where(eq(developmentPlans.id, id));
     return plan || undefined;
   }
@@ -288,21 +293,17 @@ export class DatabaseStorage implements IStorage {
     return plan;
   }
 
-  async updateDevelopmentPlan(id: string, insertPlan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan> {
-    const [plan] = await db.update(developmentPlans).set({
-      ...insertPlan,
-      updatedAt: new Date()
-    }).where(eq(developmentPlans.id, id)).returning();
+  async updateDevelopmentPlan(id: number, insertPlan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan> {
+    const [plan] = await db.update(developmentPlans).set(insertPlan).where(eq(developmentPlans.id, id)).returning();
     return plan;
   }
 
-  async getDevelopmentPlanByCadet(cadetId: string): Promise<DevelopmentPlan | undefined> {
-    const [plan] = await db.select().from(developmentPlans).where(eq(developmentPlans.cadetId, cadetId));
-    return plan || undefined;
+  async getDevelopmentPlansByCadet(cadetId: number): Promise<DevelopmentPlan[]> {
+    return await db.select().from(developmentPlans).where(eq(developmentPlans.cadetId, cadetId));
   }
 
   // Academic records
-  async getAcademicRecord(id: string): Promise<AcademicRecord | undefined> {
+  async getAcademicRecord(id: number): Promise<AcademicRecord | undefined> {
     const [record] = await db.select().from(academicRecords).where(eq(academicRecords.id, id));
     return record || undefined;
   }
@@ -312,17 +313,17 @@ export class DatabaseStorage implements IStorage {
     return record;
   }
 
-  async updateAcademicRecord(id: string, insertRecord: Partial<InsertAcademicRecord>): Promise<AcademicRecord> {
+  async updateAcademicRecord(id: number, insertRecord: Partial<InsertAcademicRecord>): Promise<AcademicRecord> {
     const [record] = await db.update(academicRecords).set(insertRecord).where(eq(academicRecords.id, id)).returning();
     return record;
   }
 
-  async getAcademicRecordsByCadet(cadetId: string): Promise<AcademicRecord[]> {
-    return await db.select().from(academicRecords).where(eq(academicRecords.cadetId, cadetId)).orderBy(desc(academicRecords.semester));
+  async getAcademicRecordsByCadet(cadetId: number): Promise<AcademicRecord[]> {
+    return await db.select().from(academicRecords).where(eq(academicRecords.cadetId, cadetId));
   }
 
   // Communications
-  async getCommunication(id: string): Promise<Communication | undefined> {
+  async getCommunication(id: number): Promise<Communication | undefined> {
     const [communication] = await db.select().from(communications).where(eq(communications.id, id));
     return communication || undefined;
   }
@@ -337,7 +338,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Parent/Guardian relationships
-  async getParentGuardian(id: string): Promise<ParentGuardian | undefined> {
+  async getParentGuardian(id: number): Promise<ParentGuardian | undefined> {
     const [parentGuardian] = await db.select().from(parentGuardians).where(eq(parentGuardians.id, id));
     return parentGuardian || undefined;
   }
@@ -347,11 +348,11 @@ export class DatabaseStorage implements IStorage {
     return parentGuardian;
   }
 
-  async getParentGuardiansByCadet(cadetId: string): Promise<ParentGuardian[]> {
+  async getParentGuardiansByCadet(cadetId: number): Promise<ParentGuardian[]> {
     return await db.select().from(parentGuardians).where(eq(parentGuardians.cadetId, cadetId));
   }
 
-  // Academic schedules/timetables
+  // Academic schedules
   async getAcademicSchedule(id: number): Promise<AcademicSchedule | undefined> {
     const [schedule] = await db.select().from(academicSchedules).where(eq(academicSchedules.id, id));
     return schedule || undefined;
@@ -371,10 +372,6 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(academicSchedules).where(eq(academicSchedules.cadetId, cadetId));
   }
 
-  async getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]> {
-    return await db.select().from(academicSchedules).where(eq(academicSchedules.dayOfWeek, dayOfWeek));
-  }
-
   // Assignments
   async getAssignment(id: number): Promise<Assignment | undefined> {
     const [assignment] = await db.select().from(assignments).where(eq(assignments.id, id));
@@ -391,16 +388,8 @@ export class DatabaseStorage implements IStorage {
     return assignment;
   }
 
-  async getAllAssignments(): Promise<Assignment[]> {
-    return await db.select().from(assignments).orderBy(desc(assignments.dueDate));
-  }
-
   async getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]> {
     return await db.select().from(assignments).where(eq(assignments.instructorId, instructorId));
-  }
-
-  async getAssignmentsByCadet(cadetId: number): Promise<Assignment[]> {
-    return await db.select().from(assignments).where(sql`${assignments.assignedToCadets} @> ${JSON.stringify([cadetId])}`);
   }
 
   // Assignment submissions
@@ -428,7 +417,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Mock tests
-  async getMockTest(id: string): Promise<MockTest | undefined> {
+  async getMockTest(id: number): Promise<MockTest | undefined> {
     const [test] = await db.select().from(mockTests).where(eq(mockTests.id, id));
     return test || undefined;
   }
@@ -438,13 +427,9 @@ export class DatabaseStorage implements IStorage {
     return test;
   }
 
-  async updateMockTest(id: string, insertTest: Partial<InsertMockTest>): Promise<MockTest> {
+  async updateMockTest(id: number, insertTest: Partial<InsertMockTest>): Promise<MockTest> {
     const [test] = await db.update(mockTests).set(insertTest).where(eq(mockTests.id, id)).returning();
     return test;
-  }
-
-  async getAllMockTests(): Promise<MockTest[]> {
-    return await db.select().from(mockTests).orderBy(desc(mockTests.createdAt));
   }
 
   async getMockTestsByInstructor(instructorId: string): Promise<MockTest[]> {
@@ -456,7 +441,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Mock test attempts
-  async getMockTestAttempt(id: string): Promise<MockTestAttempt | undefined> {
+  async getMockTestAttempt(id: number): Promise<MockTestAttempt | undefined> {
     const [attempt] = await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.id, id));
     return attempt || undefined;
   }
@@ -466,28 +451,28 @@ export class DatabaseStorage implements IStorage {
     return attempt;
   }
 
-  async getMockTestAttemptsByTest(testId: string): Promise<MockTestAttempt[]> {
+  async getMockTestAttemptsByTest(testId: number): Promise<MockTestAttempt[]> {
     return await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.testId, testId));
   }
 
-  async getMockTestAttemptsByCadet(cadetId: string): Promise<MockTestAttempt[]> {
+  async getMockTestAttemptsByCadet(cadetId: number): Promise<MockTestAttempt[]> {
     return await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.cadetId, cadetId));
   }
 
   // Class diary entries
-  async getClassDiaryEntry(id: string): Promise<ClassDiaryEntry | undefined> {
+  async getClassDiaryEntry(id: number): Promise<ClassDiaryEntry | undefined> {
     const [entry] = await db.select().from(classDiaryEntries).where(eq(classDiaryEntries.id, id));
     return entry || undefined;
   }
 
-  async createClassDiaryEntry(insertEntry: InsertClassDiaryEntry): Promise<ClassDiaryEntry> {
-    const [entry] = await db.insert(classDiaryEntries).values(insertEntry).returning();
-    return entry;
+  async createClassDiaryEntry(entry: InsertClassDiaryEntry): Promise<ClassDiaryEntry> {
+    const [diaryEntry] = await db.insert(classDiaryEntries).values(entry).returning();
+    return diaryEntry;
   }
 
-  async updateClassDiaryEntry(id: string, insertEntry: Partial<InsertClassDiaryEntry>): Promise<ClassDiaryEntry> {
-    const [entry] = await db.update(classDiaryEntries).set(insertEntry).where(eq(classDiaryEntries.id, id)).returning();
-    return entry;
+  async updateClassDiaryEntry(id: number, entry: Partial<InsertClassDiaryEntry>): Promise<ClassDiaryEntry> {
+    const [diaryEntry] = await db.update(classDiaryEntries).set(entry).where(eq(classDiaryEntries.id, id)).returning();
+    return diaryEntry;
   }
 
   async getClassDiaryEntriesByDate(date: string): Promise<ClassDiaryEntry[]> {
@@ -499,22 +484,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Fee records
-  async getFeeRecord(id: string): Promise<FeeRecord | undefined> {
-    const [record] = await db.select().from(feeRecords).where(eq(feeRecords.id, id));
-    return record || undefined;
+  async getFeeRecord(id: number): Promise<FeeRecord | undefined> {
+    const [feeRecord] = await db.select().from(feeRecords).where(eq(feeRecords.id, id));
+    return feeRecord || undefined;
   }
 
-  async createFeeRecord(insertRecord: InsertFeeRecord): Promise<FeeRecord> {
-    const [record] = await db.insert(feeRecords).values(insertRecord).returning();
+  async createFeeRecord(feeRecord: InsertFeeRecord): Promise<FeeRecord> {
+    const [record] = await db.insert(feeRecords).values(feeRecord).returning();
     return record;
   }
 
-  async updateFeeRecord(id: string, insertRecord: Partial<InsertFeeRecord>): Promise<FeeRecord> {
-    const [record] = await db.update(feeRecords).set(insertRecord).where(eq(feeRecords.id, id)).returning();
+  async updateFeeRecord(id: number, feeRecord: Partial<InsertFeeRecord>): Promise<FeeRecord> {
+    const [record] = await db.update(feeRecords).set(feeRecord).where(eq(feeRecords.id, id)).returning();
     return record;
   }
 
-  async getFeeRecordsByCadet(cadetId: string): Promise<FeeRecord[]> {
+  async getFeeRecordsByCadet(cadetId: number): Promise<FeeRecord[]> {
     return await db.select().from(feeRecords).where(eq(feeRecords.cadetId, cadetId));
   }
 
