@@ -4,7 +4,10 @@ import { storage } from "./storage";
 import { 
   insertUserSchema, insertCadetSchema, insertBehaviorIncidentSchema,
   insertFitnessAssessmentSchema, insertMentorshipSchema, insertDevelopmentPlanSchema,
-  insertAcademicRecordSchema, insertCommunicationSchema, insertParentGuardianSchema
+  insertAcademicRecordSchema, insertCommunicationSchema, insertParentGuardianSchema,
+  insertAcademicScheduleSchema, insertAssignmentSchema, insertAssignmentSubmissionSchema,
+  insertMockTestSchema, insertMockTestAttemptSchema, insertClassDiaryEntrySchema,
+  insertFeeRecordSchema
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -376,6 +379,263 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const parentGuardianData = insertParentGuardianSchema.parse(req.body);
       const parentGuardian = await storage.createParentGuardian(parentGuardianData);
       res.status(201).json(parentGuardian);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Academic schedules routes
+  app.get("/api/academic-schedules", authenticateToken, async (req, res) => {
+    try {
+      const { cadetId, dayOfWeek } = req.query;
+      let schedules;
+      if (cadetId) {
+        schedules = await storage.getAcademicSchedulesByCadet(parseInt(cadetId as string));
+      } else if (dayOfWeek) {
+        schedules = await storage.getAcademicSchedulesByDay(dayOfWeek as string);
+      } else {
+        // Return empty array or implement a general method
+        schedules = [];
+      }
+      res.json(schedules);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/academic-schedules", authenticateToken, async (req, res) => {
+    try {
+      const scheduleData = insertAcademicScheduleSchema.parse(req.body);
+      const schedule = await storage.createAcademicSchedule(scheduleData);
+      res.status(201).json(schedule);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/academic-schedules/:id", authenticateToken, async (req, res) => {
+    try {
+      const scheduleData = insertAcademicScheduleSchema.partial().parse(req.body);
+      const schedule = await storage.updateAcademicSchedule(parseInt(req.params.id), scheduleData);
+      res.json(schedule);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Assignments routes
+  app.get("/api/assignments", authenticateToken, async (req, res) => {
+    try {
+      const { instructorId, cadetId } = req.query;
+      let assignments;
+      if (instructorId) {
+        assignments = await storage.getAssignmentsByInstructor(instructorId as string);
+      } else if (cadetId) {
+        assignments = await storage.getAssignmentsByCadet(parseInt(cadetId as string));
+      } else {
+        assignments = await storage.getAllAssignments();
+      }
+      res.json(assignments);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/assignments", authenticateToken, async (req, res) => {
+    try {
+      const assignmentData = insertAssignmentSchema.parse(req.body);
+      const assignment = await storage.createAssignment(assignmentData);
+      res.status(201).json(assignment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/assignments/:id", authenticateToken, async (req, res) => {
+    try {
+      const assignmentData = insertAssignmentSchema.partial().parse(req.body);
+      const assignment = await storage.updateAssignment(parseInt(req.params.id), assignmentData);
+      res.json(assignment);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Assignment submissions routes
+  app.get("/api/assignment-submissions", authenticateToken, async (req, res) => {
+    try {
+      const { assignmentId, cadetId } = req.query;
+      let submissions;
+      if (assignmentId) {
+        submissions = await storage.getAssignmentSubmissionsByAssignment(parseInt(assignmentId as string));
+      } else if (cadetId) {
+        submissions = await storage.getAssignmentSubmissionsByCadet(parseInt(cadetId as string));
+      } else {
+        submissions = [];
+      }
+      res.json(submissions);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/assignment-submissions", authenticateToken, async (req, res) => {
+    try {
+      const submissionData = insertAssignmentSubmissionSchema.parse(req.body);
+      const submission = await storage.createAssignmentSubmission(submissionData);
+      res.status(201).json(submission);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/assignment-submissions/:id", authenticateToken, async (req, res) => {
+    try {
+      const submissionData = insertAssignmentSubmissionSchema.partial().parse(req.body);
+      const submission = await storage.updateAssignmentSubmission(parseInt(req.params.id), submissionData);
+      res.json(submission);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Mock tests routes
+  app.get("/api/mock-tests", authenticateToken, async (req, res) => {
+    try {
+      const { instructorId, active } = req.query;
+      let tests;
+      if (instructorId) {
+        tests = await storage.getMockTestsByInstructor(instructorId as string);
+      } else if (active === "true") {
+        tests = await storage.getActiveMockTests();
+      } else {
+        tests = await storage.getAllMockTests();
+      }
+      res.json(tests);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/mock-tests", authenticateToken, async (req, res) => {
+    try {
+      const testData = insertMockTestSchema.parse(req.body);
+      const test = await storage.createMockTest(testData);
+      res.status(201).json(test);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/mock-tests/:id", authenticateToken, async (req, res) => {
+    try {
+      const testData = insertMockTestSchema.partial().parse(req.body);
+      const test = await storage.updateMockTest(parseInt(req.params.id), testData);
+      res.json(test);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Mock test attempts routes
+  app.get("/api/mock-test-attempts", authenticateToken, async (req, res) => {
+    try {
+      const { testId, cadetId } = req.query;
+      let attempts;
+      if (testId) {
+        attempts = await storage.getMockTestAttemptsByTest(parseInt(testId as string));
+      } else if (cadetId) {
+        attempts = await storage.getMockTestAttemptsByCadet(parseInt(cadetId as string));
+      } else {
+        attempts = [];
+      }
+      res.json(attempts);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/mock-test-attempts", authenticateToken, async (req, res) => {
+    try {
+      const attemptData = insertMockTestAttemptSchema.parse(req.body);
+      const attempt = await storage.createMockTestAttempt(attemptData);
+      res.status(201).json(attempt);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Class diary routes
+  app.get("/api/class-diary", authenticateToken, async (req, res) => {
+    try {
+      const { date, subject } = req.query;
+      let entries;
+      if (date) {
+        entries = await storage.getClassDiaryEntriesByDate(date as string);
+      } else if (subject) {
+        entries = await storage.getClassDiaryEntriesBySubject(subject as string);
+      } else {
+        entries = [];
+      }
+      res.json(entries);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/class-diary", authenticateToken, async (req, res) => {
+    try {
+      const entryData = insertClassDiaryEntrySchema.parse(req.body);
+      const entry = await storage.createClassDiaryEntry(entryData);
+      res.status(201).json(entry);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/class-diary/:id", authenticateToken, async (req, res) => {
+    try {
+      const entryData = insertClassDiaryEntrySchema.partial().parse(req.body);
+      const entry = await storage.updateClassDiaryEntry(parseInt(req.params.id), entryData);
+      res.json(entry);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Fee records routes
+  app.get("/api/fee-records", authenticateToken, async (req, res) => {
+    try {
+      const { cadetId, overdue } = req.query;
+      let records;
+      if (cadetId) {
+        records = await storage.getFeeRecordsByCadet(parseInt(cadetId as string));
+      } else if (overdue === "true") {
+        records = await storage.getOverdueFees();
+      } else {
+        records = [];
+      }
+      res.json(records);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/fee-records", authenticateToken, async (req, res) => {
+    try {
+      const feeData = insertFeeRecordSchema.parse(req.body);
+      const record = await storage.createFeeRecord(feeData);
+      res.status(201).json(record);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/fee-records/:id", authenticateToken, async (req, res) => {
+    try {
+      const feeData = insertFeeRecordSchema.partial().parse(req.body);
+      const record = await storage.updateFeeRecord(parseInt(req.params.id), feeData);
+      res.json(record);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
     }

@@ -1,4 +1,5 @@
-import { UserPlus, ClipboardList, Dumbbell, Handshake, Megaphone, FileText } from "lucide-react";
+import { UserPlus, ClipboardList, Dumbbell, Handshake, Megaphone, FileText, Calendar, BookOpen, Trophy, NotebookPen } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface QuickAction {
   id: string;
@@ -7,51 +8,6 @@ interface QuickAction {
   color: string;
   action: () => void;
 }
-
-const quickActions: QuickAction[] = [
-  {
-    id: 'add-cadet',
-    label: 'Add New Cadet',
-    icon: UserPlus,
-    color: 'navy',
-    action: () => console.log('Add new cadet'),
-  },
-  {
-    id: 'record-incident',
-    label: 'Record Incident',
-    icon: ClipboardList,
-    color: 'red',
-    action: () => console.log('Record incident'),
-  },
-  {
-    id: 'fitness-assessment',
-    label: 'Fitness Assessment',
-    icon: Dumbbell,
-    color: 'green',
-    action: () => console.log('Fitness assessment'),
-  },
-  {
-    id: 'assign-mentor',
-    label: 'Assign Mentor',
-    icon: Handshake,
-    color: 'purple',
-    action: () => console.log('Assign mentor'),
-  },
-  {
-    id: 'send-notice',
-    label: 'Send Notice',
-    icon: Megaphone,
-    color: 'blue',
-    action: () => console.log('Send notice'),
-  },
-  {
-    id: 'generate-report',
-    label: 'Generate Report',
-    icon: FileText,
-    color: 'gold',
-    action: () => console.log('Generate report'),
-  },
-];
 
 const getColorClasses = (color: string) => {
   const colorMap = {
@@ -79,11 +35,90 @@ const getColorClasses = (color: string) => {
       bg: 'bg-academy-gold/20 group-hover:bg-academy-gold/30',
       icon: 'text-academy-gold',
     },
+    orange: {
+      bg: 'bg-orange-100 group-hover:bg-orange-200 dark:bg-orange-900/20 dark:group-hover:bg-orange-900/30',
+      icon: 'text-orange-600',
+    },
   };
-  return colorMap[color as keyof typeof colorMap];
+  return colorMap[color as keyof typeof colorMap] || colorMap.navy;
 };
 
 export default function QuickActions() {
+  const [location, navigate] = useLocation();
+  
+  const quickActions: QuickAction[] = [
+    {
+      id: 'add-cadet',
+      label: 'Add New Cadet',
+      icon: UserPlus,
+      color: 'navy',
+      action: () => navigate('/cadet-management'),
+    },
+    {
+      id: 'record-incident',
+      label: 'Record Incident',
+      icon: ClipboardList,
+      color: 'red',
+      action: () => navigate('/behavior-tracking'),
+    },
+    {
+      id: 'fitness-assessment',
+      label: 'Fitness Assessment',
+      icon: Dumbbell,
+      color: 'green',
+      action: () => navigate('/physical-fitness'),
+    },
+    {
+      id: 'assign-mentor',
+      label: 'Assign Mentor',
+      icon: Handshake,
+      color: 'purple',
+      action: () => navigate('/mentorship-program'),
+    },
+    {
+      id: 'academic-timetable',
+      label: 'Academic Timetable',
+      icon: Calendar,
+      color: 'orange',
+      action: () => navigate('/academic-timetable'),
+    },
+    {
+      id: 'assignment-management',
+      label: 'Assignments',
+      icon: BookOpen,
+      color: 'blue',
+      action: () => navigate('/assignment-management'),
+    },
+    {
+      id: 'mock-tests',
+      label: 'Mock Tests',
+      icon: Trophy,
+      color: 'purple',
+      action: () => navigate('/mock-tests'),
+    },
+    {
+      id: 'class-diary',
+      label: 'Class Diary',
+      icon: NotebookPen,
+      color: 'green',
+      action: () => navigate('/class-diary'),
+    },
+    {
+      id: 'send-notice',
+      label: 'Send Notice',
+      icon: Megaphone,
+      color: 'navy',
+      action: () => navigate('/communications'),
+    },
+    {
+      id: 'generate-report',
+      label: 'Generate Report',
+      icon: FileText,
+      color: 'gold',
+      action: () => navigate('/analytics-reports'),
+    },
+  ];
+
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border p-6">
       <h3 className="text-lg font-semibold text-card-foreground mb-6">Quick Actions</h3>

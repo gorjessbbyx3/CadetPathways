@@ -1,6 +1,8 @@
 import { 
   users, cadets, behaviorIncidents, fitnessAssessments, mentorships, 
   developmentPlans, academicRecords, communications, parentGuardians,
+  academicSchedules, assignments, assignmentSubmissions, mockTests, 
+  mockTestAttempts, classDiaryEntries, feeRecords,
   type User, type InsertUser, type Cadet, type InsertCadet,
   type BehaviorIncident, type InsertBehaviorIncident,
   type FitnessAssessment, type InsertFitnessAssessment,
@@ -8,7 +10,14 @@ import {
   type DevelopmentPlan, type InsertDevelopmentPlan,
   type AcademicRecord, type InsertAcademicRecord,
   type Communication, type InsertCommunication,
-  type ParentGuardian, type InsertParentGuardian
+  type ParentGuardian, type InsertParentGuardian,
+  type AcademicSchedule, type InsertAcademicSchedule,
+  type Assignment, type InsertAssignment,
+  type AssignmentSubmission, type InsertAssignmentSubmission,
+  type MockTest, type InsertMockTest,
+  type MockTestAttempt, type InsertMockTestAttempt,
+  type ClassDiaryEntry, type InsertClassDiaryEntry,
+  type FeeRecord, type InsertFeeRecord
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, like, sql, count } from "drizzle-orm";
@@ -22,56 +31,106 @@ export interface IStorage {
   getAllStaff(): Promise<User[]>;
 
   // Cadet management
-  getCadet(id: string): Promise<Cadet | undefined>;
+  getCadet(id: number): Promise<Cadet | undefined>;
   createCadet(cadet: InsertCadet): Promise<Cadet>;
-  updateCadet(id: string, cadet: Partial<InsertCadet>): Promise<Cadet>;
+  updateCadet(id: number, cadet: Partial<InsertCadet>): Promise<Cadet>;
   getAllCadets(): Promise<Cadet[]>;
   searchCadets(query: string): Promise<Cadet[]>;
   getCadetsByStatus(status: string): Promise<Cadet[]>;
 
   // Behavior incidents
-  getBehaviorIncident(id: string): Promise<BehaviorIncident | undefined>;
+  getBehaviorIncident(id: number): Promise<BehaviorIncident | undefined>;
   createBehaviorIncident(incident: InsertBehaviorIncident): Promise<BehaviorIncident>;
-  updateBehaviorIncident(id: string, incident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident>;
-  getBehaviorIncidentsByCadet(cadetId: string): Promise<BehaviorIncident[]>;
+  updateBehaviorIncident(id: number, incident: Partial<InsertBehaviorIncident>): Promise<BehaviorIncident>;
+  getBehaviorIncidentsByCadet(cadetId: number): Promise<BehaviorIncident[]>;
   getRecentBehaviorIncidents(limit?: number): Promise<BehaviorIncident[]>;
 
   // Fitness assessments
-  getFitnessAssessment(id: string): Promise<FitnessAssessment | undefined>;
+  getFitnessAssessment(id: number): Promise<FitnessAssessment | undefined>;
   createFitnessAssessment(assessment: InsertFitnessAssessment): Promise<FitnessAssessment>;
-  updateFitnessAssessment(id: string, assessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment>;
-  getFitnessAssessmentsByCadet(cadetId: string): Promise<FitnessAssessment[]>;
-  getLatestFitnessAssessmentByCadet(cadetId: string): Promise<FitnessAssessment | undefined>;
+  updateFitnessAssessment(id: number, assessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment>;
+  getFitnessAssessmentsByCadet(cadetId: number): Promise<FitnessAssessment[]>;
+  getLatestFitnessAssessmentByCadet(cadetId: number): Promise<FitnessAssessment | undefined>;
 
   // Mentorships
-  getMentorship(id: string): Promise<Mentorship | undefined>;
+  getMentorship(id: number): Promise<Mentorship | undefined>;
   createMentorship(mentorship: InsertMentorship): Promise<Mentorship>;
-  updateMentorship(id: string, mentorship: Partial<InsertMentorship>): Promise<Mentorship>;
-  getMentorshipsByCadet(cadetId: string): Promise<Mentorship[]>;
+  updateMentorship(id: number, mentorship: Partial<InsertMentorship>): Promise<Mentorship>;
+  getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]>;
   getMentorshipsByMentor(mentorId: string): Promise<Mentorship[]>;
   getActiveMentorships(): Promise<Mentorship[]>;
 
   // Development plans
-  getDevelopmentPlan(id: string): Promise<DevelopmentPlan | undefined>;
+  getDevelopmentPlan(id: number): Promise<DevelopmentPlan | undefined>;
   createDevelopmentPlan(plan: InsertDevelopmentPlan): Promise<DevelopmentPlan>;
-  updateDevelopmentPlan(id: string, plan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan>;
-  getDevelopmentPlanByCadet(cadetId: string): Promise<DevelopmentPlan | undefined>;
+  updateDevelopmentPlan(id: number, plan: Partial<InsertDevelopmentPlan>): Promise<DevelopmentPlan>;
+  getDevelopmentPlanByCadet(cadetId: number): Promise<DevelopmentPlan | undefined>;
 
   // Academic records
-  getAcademicRecord(id: string): Promise<AcademicRecord | undefined>;
+  getAcademicRecord(id: number): Promise<AcademicRecord | undefined>;
   createAcademicRecord(record: InsertAcademicRecord): Promise<AcademicRecord>;
-  updateAcademicRecord(id: string, record: Partial<InsertAcademicRecord>): Promise<AcademicRecord>;
-  getAcademicRecordsByCadet(cadetId: string): Promise<AcademicRecord[]>;
+  updateAcademicRecord(id: number, record: Partial<InsertAcademicRecord>): Promise<AcademicRecord>;
+  getAcademicRecordsByCadet(cadetId: number): Promise<AcademicRecord[]>;
 
   // Communications
-  getCommunication(id: string): Promise<Communication | undefined>;
+  getCommunication(id: number): Promise<Communication | undefined>;
   createCommunication(communication: InsertCommunication): Promise<Communication>;
   getRecentCommunications(limit?: number): Promise<Communication[]>;
 
   // Parent/Guardian relationships
-  getParentGuardian(id: string): Promise<ParentGuardian | undefined>;
+  getParentGuardian(id: number): Promise<ParentGuardian | undefined>;
   createParentGuardian(parentGuardian: InsertParentGuardian): Promise<ParentGuardian>;
-  getParentGuardiansByCadet(cadetId: string): Promise<ParentGuardian[]>;
+  getParentGuardiansByCadet(cadetId: number): Promise<ParentGuardian[]>;
+
+  // Academic schedules/timetables
+  getAcademicSchedule(id: number): Promise<AcademicSchedule | undefined>;
+  createAcademicSchedule(schedule: InsertAcademicSchedule): Promise<AcademicSchedule>;
+  updateAcademicSchedule(id: number, schedule: Partial<InsertAcademicSchedule>): Promise<AcademicSchedule>;
+  getAcademicSchedulesByCadet(cadetId: number): Promise<AcademicSchedule[]>;
+  getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]>;
+
+  // Assignments
+  getAssignment(id: number): Promise<Assignment | undefined>;
+  createAssignment(assignment: InsertAssignment): Promise<Assignment>;
+  updateAssignment(id: number, assignment: Partial<InsertAssignment>): Promise<Assignment>;
+  getAllAssignments(): Promise<Assignment[]>;
+  getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]>;
+  getAssignmentsByCadet(cadetId: number): Promise<Assignment[]>;
+
+  // Assignment submissions
+  getAssignmentSubmission(id: number): Promise<AssignmentSubmission | undefined>;
+  createAssignmentSubmission(submission: InsertAssignmentSubmission): Promise<AssignmentSubmission>;
+  updateAssignmentSubmission(id: number, submission: Partial<InsertAssignmentSubmission>): Promise<AssignmentSubmission>;
+  getAssignmentSubmissionsByAssignment(assignmentId: number): Promise<AssignmentSubmission[]>;
+  getAssignmentSubmissionsByCadet(cadetId: number): Promise<AssignmentSubmission[]>;
+
+  // Mock tests
+  getMockTest(id: number): Promise<MockTest | undefined>;
+  createMockTest(test: InsertMockTest): Promise<MockTest>;
+  updateMockTest(id: number, test: Partial<InsertMockTest>): Promise<MockTest>;
+  getAllMockTests(): Promise<MockTest[]>;
+  getMockTestsByInstructor(instructorId: string): Promise<MockTest[]>;
+  getActiveMockTests(): Promise<MockTest[]>;
+
+  // Mock test attempts
+  getMockTestAttempt(id: number): Promise<MockTestAttempt | undefined>;
+  createMockTestAttempt(attempt: InsertMockTestAttempt): Promise<MockTestAttempt>;
+  getMockTestAttemptsByTest(testId: number): Promise<MockTestAttempt[]>;
+  getMockTestAttemptsByCadet(cadetId: number): Promise<MockTestAttempt[]>;
+
+  // Class diary entries
+  getClassDiaryEntry(id: number): Promise<ClassDiaryEntry | undefined>;
+  createClassDiaryEntry(entry: InsertClassDiaryEntry): Promise<ClassDiaryEntry>;
+  updateClassDiaryEntry(id: number, entry: Partial<InsertClassDiaryEntry>): Promise<ClassDiaryEntry>;
+  getClassDiaryEntriesByDate(date: string): Promise<ClassDiaryEntry[]>;
+  getClassDiaryEntriesBySubject(subject: string): Promise<ClassDiaryEntry[]>;
+
+  // Fee records
+  getFeeRecord(id: number): Promise<FeeRecord | undefined>;
+  createFeeRecord(feeRecord: InsertFeeRecord): Promise<FeeRecord>;
+  updateFeeRecord(id: number, feeRecord: Partial<InsertFeeRecord>): Promise<FeeRecord>;
+  getFeeRecordsByCadet(cadetId: number): Promise<FeeRecord[]>;
+  getOverdueFees(): Promise<FeeRecord[]>;
 
   // Dashboard statistics
   getDashboardStats(): Promise<{
@@ -290,6 +349,180 @@ export class DatabaseStorage implements IStorage {
 
   async getParentGuardiansByCadet(cadetId: string): Promise<ParentGuardian[]> {
     return await db.select().from(parentGuardians).where(eq(parentGuardians.cadetId, cadetId));
+  }
+
+  // Academic schedules/timetables
+  async getAcademicSchedule(id: number): Promise<AcademicSchedule | undefined> {
+    const [schedule] = await db.select().from(academicSchedules).where(eq(academicSchedules.id, id));
+    return schedule || undefined;
+  }
+
+  async createAcademicSchedule(insertSchedule: InsertAcademicSchedule): Promise<AcademicSchedule> {
+    const [schedule] = await db.insert(academicSchedules).values(insertSchedule).returning();
+    return schedule;
+  }
+
+  async updateAcademicSchedule(id: number, insertSchedule: Partial<InsertAcademicSchedule>): Promise<AcademicSchedule> {
+    const [schedule] = await db.update(academicSchedules).set(insertSchedule).where(eq(academicSchedules.id, id)).returning();
+    return schedule;
+  }
+
+  async getAcademicSchedulesByCadet(cadetId: number): Promise<AcademicSchedule[]> {
+    return await db.select().from(academicSchedules).where(eq(academicSchedules.cadetId, cadetId));
+  }
+
+  async getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]> {
+    return await db.select().from(academicSchedules).where(eq(academicSchedules.dayOfWeek, dayOfWeek));
+  }
+
+  // Assignments
+  async getAssignment(id: number): Promise<Assignment | undefined> {
+    const [assignment] = await db.select().from(assignments).where(eq(assignments.id, id));
+    return assignment || undefined;
+  }
+
+  async createAssignment(insertAssignment: InsertAssignment): Promise<Assignment> {
+    const [assignment] = await db.insert(assignments).values(insertAssignment).returning();
+    return assignment;
+  }
+
+  async updateAssignment(id: number, insertAssignment: Partial<InsertAssignment>): Promise<Assignment> {
+    const [assignment] = await db.update(assignments).set(insertAssignment).where(eq(assignments.id, id)).returning();
+    return assignment;
+  }
+
+  async getAllAssignments(): Promise<Assignment[]> {
+    return await db.select().from(assignments).orderBy(desc(assignments.dueDate));
+  }
+
+  async getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]> {
+    return await db.select().from(assignments).where(eq(assignments.instructorId, instructorId));
+  }
+
+  async getAssignmentsByCadet(cadetId: number): Promise<Assignment[]> {
+    return await db.select().from(assignments).where(sql`${assignments.assignedToCadets} @> ${JSON.stringify([cadetId])}`);
+  }
+
+  // Assignment submissions
+  async getAssignmentSubmission(id: number): Promise<AssignmentSubmission | undefined> {
+    const [submission] = await db.select().from(assignmentSubmissions).where(eq(assignmentSubmissions.id, id));
+    return submission || undefined;
+  }
+
+  async createAssignmentSubmission(insertSubmission: InsertAssignmentSubmission): Promise<AssignmentSubmission> {
+    const [submission] = await db.insert(assignmentSubmissions).values(insertSubmission).returning();
+    return submission;
+  }
+
+  async updateAssignmentSubmission(id: number, insertSubmission: Partial<InsertAssignmentSubmission>): Promise<AssignmentSubmission> {
+    const [submission] = await db.update(assignmentSubmissions).set(insertSubmission).where(eq(assignmentSubmissions.id, id)).returning();
+    return submission;
+  }
+
+  async getAssignmentSubmissionsByAssignment(assignmentId: number): Promise<AssignmentSubmission[]> {
+    return await db.select().from(assignmentSubmissions).where(eq(assignmentSubmissions.assignmentId, assignmentId));
+  }
+
+  async getAssignmentSubmissionsByCadet(cadetId: number): Promise<AssignmentSubmission[]> {
+    return await db.select().from(assignmentSubmissions).where(eq(assignmentSubmissions.cadetId, cadetId));
+  }
+
+  // Mock tests
+  async getMockTest(id: string): Promise<MockTest | undefined> {
+    const [test] = await db.select().from(mockTests).where(eq(mockTests.id, id));
+    return test || undefined;
+  }
+
+  async createMockTest(insertTest: InsertMockTest): Promise<MockTest> {
+    const [test] = await db.insert(mockTests).values(insertTest).returning();
+    return test;
+  }
+
+  async updateMockTest(id: string, insertTest: Partial<InsertMockTest>): Promise<MockTest> {
+    const [test] = await db.update(mockTests).set(insertTest).where(eq(mockTests.id, id)).returning();
+    return test;
+  }
+
+  async getAllMockTests(): Promise<MockTest[]> {
+    return await db.select().from(mockTests).orderBy(desc(mockTests.createdAt));
+  }
+
+  async getMockTestsByInstructor(instructorId: string): Promise<MockTest[]> {
+    return await db.select().from(mockTests).where(eq(mockTests.instructorId, instructorId));
+  }
+
+  async getActiveMockTests(): Promise<MockTest[]> {
+    return await db.select().from(mockTests).where(eq(mockTests.isActive, true));
+  }
+
+  // Mock test attempts
+  async getMockTestAttempt(id: string): Promise<MockTestAttempt | undefined> {
+    const [attempt] = await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.id, id));
+    return attempt || undefined;
+  }
+
+  async createMockTestAttempt(insertAttempt: InsertMockTestAttempt): Promise<MockTestAttempt> {
+    const [attempt] = await db.insert(mockTestAttempts).values(insertAttempt).returning();
+    return attempt;
+  }
+
+  async getMockTestAttemptsByTest(testId: string): Promise<MockTestAttempt[]> {
+    return await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.testId, testId));
+  }
+
+  async getMockTestAttemptsByCadet(cadetId: string): Promise<MockTestAttempt[]> {
+    return await db.select().from(mockTestAttempts).where(eq(mockTestAttempts.cadetId, cadetId));
+  }
+
+  // Class diary entries
+  async getClassDiaryEntry(id: string): Promise<ClassDiaryEntry | undefined> {
+    const [entry] = await db.select().from(classDiaryEntries).where(eq(classDiaryEntries.id, id));
+    return entry || undefined;
+  }
+
+  async createClassDiaryEntry(insertEntry: InsertClassDiaryEntry): Promise<ClassDiaryEntry> {
+    const [entry] = await db.insert(classDiaryEntries).values(insertEntry).returning();
+    return entry;
+  }
+
+  async updateClassDiaryEntry(id: string, insertEntry: Partial<InsertClassDiaryEntry>): Promise<ClassDiaryEntry> {
+    const [entry] = await db.update(classDiaryEntries).set(insertEntry).where(eq(classDiaryEntries.id, id)).returning();
+    return entry;
+  }
+
+  async getClassDiaryEntriesByDate(date: string): Promise<ClassDiaryEntry[]> {
+    return await db.select().from(classDiaryEntries).where(eq(classDiaryEntries.date, date));
+  }
+
+  async getClassDiaryEntriesBySubject(subject: string): Promise<ClassDiaryEntry[]> {
+    return await db.select().from(classDiaryEntries).where(eq(classDiaryEntries.subject, subject));
+  }
+
+  // Fee records
+  async getFeeRecord(id: string): Promise<FeeRecord | undefined> {
+    const [record] = await db.select().from(feeRecords).where(eq(feeRecords.id, id));
+    return record || undefined;
+  }
+
+  async createFeeRecord(insertRecord: InsertFeeRecord): Promise<FeeRecord> {
+    const [record] = await db.insert(feeRecords).values(insertRecord).returning();
+    return record;
+  }
+
+  async updateFeeRecord(id: string, insertRecord: Partial<InsertFeeRecord>): Promise<FeeRecord> {
+    const [record] = await db.update(feeRecords).set(insertRecord).where(eq(feeRecords.id, id)).returning();
+    return record;
+  }
+
+  async getFeeRecordsByCadet(cadetId: string): Promise<FeeRecord[]> {
+    return await db.select().from(feeRecords).where(eq(feeRecords.cadetId, cadetId));
+  }
+
+  async getOverdueFees(): Promise<FeeRecord[]> {
+    return await db.select().from(feeRecords).where(and(
+      eq(feeRecords.status, 'pending'),
+      sql`${feeRecords.dueDate} < CURRENT_DATE`
+    ));
   }
 
   // Dashboard statistics

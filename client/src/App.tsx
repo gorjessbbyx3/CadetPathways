@@ -15,6 +15,10 @@ import Communications from "@/pages/communications";
 import AnalyticsReports from "@/pages/analytics-reports";
 import Login from "@/pages/login";
 import NotFound from "@/pages/not-found";
+import AcademicTimetable from "@/pages/academic-timetable";
+import AssignmentManagement from "@/pages/assignment-management";
+import MockTests from "@/pages/mock-tests";
+import ClassDiary from "@/pages/class-diary";
 
 function Router() {
   return (
@@ -30,6 +34,10 @@ function Router() {
       <Route path="/staff-management" component={StaffManagement} />
       <Route path="/communications" component={Communications} />
       <Route path="/analytics-reports" component={AnalyticsReports} />
+      <Route path="/academic-timetable" component={AcademicTimetable} />
+      <Route path="/assignment-management" component={AssignmentManagement} />
+      <Route path="/mock-tests" component={MockTests} />
+      <Route path="/class-diary" component={ClassDiary} />
       <Route component={NotFound} />
     </Switch>
   );
