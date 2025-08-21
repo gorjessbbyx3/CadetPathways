@@ -54,7 +54,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd School-CRM/frontend && npm install && npm run dev"
+args = "npm run dev"
 
 [[workflows.workflow]]
 name = "School-CRM Full Stack"
@@ -63,11 +63,7 @@ mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd School-CRM/backend && npm start"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd School-CRM/frontend && npm run dev"
+args = "npm run dev"
 
 [agent]
 integrations = ["javascript_database==1.0.0"]
