@@ -64,6 +64,7 @@ export default {
         // Military Academy Colors
         navy: {
           50: "var(--navy-50)",
+          300: "var(--navy-300)",
           500: "var(--navy-500)",
           600: "var(--navy-600)",
           700: "var(--navy-700)",

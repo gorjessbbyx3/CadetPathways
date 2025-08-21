@@ -4,7 +4,7 @@
 
 @layer components {
   .quick-action-card {
-    @apply flex flex-col items-center p-4 bg-card border border-border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-navy-300;
+    @apply flex flex-col items-center p-4 bg-card border border-border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary;
   }
 
   .quick-action-card:hover {
@@ -60,6 +60,7 @@
 
   /* Military Academy Color Variables */
   --navy-50: hsl(215 100% 97%);
+  --navy-300: hsl(215 50% 75%);
   --navy-500: hsl(217 91% 60%);
   --navy-600: hsl(221 83% 53%);
   --navy-700: hsl(224 76% 48%);
@@ -127,6 +128,7 @@
 
   /* Dark mode military colors */
   --navy-50: hsl(215 20% 7%);
+  --navy-300: hsl(215 30% 25%);
   --navy-900: hsl(215 100% 97%);
 
   --military-50: hsl(120 20% 7%);
