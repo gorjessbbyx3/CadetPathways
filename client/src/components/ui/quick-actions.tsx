@@ -46,76 +46,82 @@ const getColorClasses = (color: string) => {
 export default function QuickActions() {
   const [location, navigate] = useLocation();
   
+  const handleNavigation = (path: string, actionName: string) => {
+    // Add visual feedback before navigation
+    console.log(`Navigating to ${actionName}...`);
+    navigate(path);
+  };
+  
   const quickActions: QuickAction[] = [
     {
       id: 'add-cadet',
       label: 'Add New Cadet',
       icon: UserPlus,
       color: 'navy',
-      action: () => navigate('/cadet-management'),
+      action: () => handleNavigation('/cadet-management', 'Add New Cadet'),
     },
     {
       id: 'record-incident',
       label: 'Record Incident',
       icon: ClipboardList,
       color: 'red',
-      action: () => navigate('/behavior-tracking'),
+      action: () => handleNavigation('/behavior-tracking', 'Record Incident'),
     },
     {
       id: 'fitness-assessment',
       label: 'Fitness Assessment',
       icon: Dumbbell,
       color: 'green',
-      action: () => navigate('/physical-fitness'),
+      action: () => handleNavigation('/physical-fitness', 'Fitness Assessment'),
     },
     {
       id: 'assign-mentor',
       label: 'Assign Mentor',
       icon: Handshake,
       color: 'purple',
-      action: () => navigate('/mentorship-program'),
+      action: () => handleNavigation('/mentorship-program', 'Assign Mentor'),
     },
     {
       id: 'academic-timetable',
       label: 'Academic Timetable',
       icon: Calendar,
       color: 'orange',
-      action: () => navigate('/academic-timetable'),
+      action: () => handleNavigation('/academic-timetable', 'Academic Timetable'),
     },
     {
       id: 'assignment-management',
       label: 'Assignments',
       icon: BookOpen,
       color: 'blue',
-      action: () => navigate('/assignment-management'),
+      action: () => handleNavigation('/assignment-management', 'Assignments'),
     },
     {
       id: 'mock-tests',
       label: 'Mock Tests',
       icon: Trophy,
       color: 'purple',
-      action: () => navigate('/mock-tests'),
+      action: () => handleNavigation('/mock-tests', 'Mock Tests'),
     },
     {
       id: 'class-diary',
       label: 'Class Diary',
       icon: NotebookPen,
       color: 'green',
-      action: () => navigate('/class-diary'),
+      action: () => handleNavigation('/class-diary', 'Class Diary'),
     },
     {
       id: 'send-notice',
       label: 'Send Notice',
       icon: Megaphone,
       color: 'navy',
-      action: () => navigate('/communications'),
+      action: () => handleNavigation('/communications', 'Send Notice'),
     },
     {
       id: 'generate-report',
       label: 'Generate Report',
       icon: FileText,
       color: 'gold',
-      action: () => navigate('/analytics-reports'),
+      action: () => handleNavigation('/analytics-reports', 'Generate Report'),
     },
   ];
 
@@ -131,13 +137,15 @@ export default function QuickActions() {
             <button
               key={action.id}
               onClick={action.action}
-              className="quick-action-card"
+              className="quick-action-card group hover:scale-105 transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-navy-600 focus:ring-offset-2 rounded-lg"
               data-testid={`action-${action.id}`}
+              title={`Navigate to ${action.label}`}
+              aria-label={`Navigate to ${action.label}`}
             >
-              <div className={`w-12 h-12 ${colors.bg} rounded-lg flex items-center justify-center transition-colors mb-3`}>
-                <Icon className={`${colors.icon} text-xl`} size={24} />
+              <div className={`w-12 h-12 ${colors.bg} rounded-lg flex items-center justify-center transition-all duration-200 mb-3 group-hover:scale-110`}>
+                <Icon className={`${colors.icon} text-xl transition-transform duration-200`} size={24} />
               </div>
-              <span className="text-sm font-medium text-card-foreground text-center">
+              <span className="text-sm font-medium text-card-foreground text-center group-hover:text-navy-600 transition-colors">
                 {action.label}
               </span>
             </button>

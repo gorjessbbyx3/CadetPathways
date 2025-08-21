@@ -18,7 +18,7 @@ export default function DashboardStats() {
     },
   });
 
-  if (isLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
@@ -28,6 +28,22 @@ export default function DashboardStats() {
             <div className="h-4 bg-muted rounded w-2/3"></div>
           </div>
         ))}
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="col-span-full text-center p-8 bg-card rounded-xl border border-border">
+          <p className="text-muted-foreground">Unable to load dashboard statistics.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-2 text-navy-600 hover:text-navy-800 underline"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

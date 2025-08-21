@@ -48,6 +48,15 @@ export default function Dashboard() {
     timeZoneName: 'short'
   });
 
+  const handleQuickAddCadet = () => {
+    setLocation("/cadet-management");
+  };
+
+  const handleNotifications = () => {
+    // Toggle notifications panel or navigate to communications
+    setLocation("/communications");
+  };
+
   return (
     <div className="flex h-screen bg-gray-50">
       <SidebarNavigation />
@@ -65,16 +74,25 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               {/* Quick Actions */}
-              <Button className="bg-navy-600 text-white hover:bg-navy-700" data-testid="button-quick-add-cadet">
+              <Button 
+                onClick={handleQuickAddCadet}
+                className="bg-navy-600 text-white hover:bg-navy-700 transition-colors" 
+                data-testid="button-quick-add-cadet"
+              >
                 <Plus className="mr-2" size={16} />
                 Add Cadet
               </Button>
               
               {/* Notifications */}
               <div className="relative">
-                <button className="p-2 text-muted-foreground hover:text-foreground relative" data-testid="button-notifications">
+                <button 
+                  onClick={handleNotifications}
+                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors relative" 
+                  data-testid="button-notifications"
+                  title="View notifications and communications"
+                >
                   <Bell size={20} />
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
                     3
                   </span>
                 </button>
