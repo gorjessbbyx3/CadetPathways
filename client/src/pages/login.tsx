@@ -92,7 +92,17 @@ export default function Login() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+          <div className="mt-6 text-center text-sm text-muted-foreground space-y-2">
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Demo Credentials:</p>
+              <p className="text-blue-800 dark:text-blue-200">Email: admin@academy.mil</p>
+              <p className="text-blue-800 dark:text-blue-200">Password: admin123</p>
+            </div>
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+              <p className="text-amber-800 dark:text-amber-200 text-xs">
+                📝 <strong>Remember:</strong> Change admin password in Staff Management page after first login
+              </p>
+            </div>
             <p>Need access? Contact your system administrator.</p>
           </div>
         </CardContent>
