@@ -148,7 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/cadets/:id", authenticateToken, async (req, res) => {
     try {
       const cadetData = insertCadetSchema.partial().parse(req.body);
-      const cadet = await storage.updateCadet(req.params.id, cadetData);
+      const cadet = await storage.updateCadet(parseInt(req.params.id), cadetData);
       res.json(cadet);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let incidents;
       if (cadetId) {
-        incidents = await storage.getBehaviorIncidentsByCadet(cadetId as string);
+        incidents = await storage.getBehaviorIncidentsByCadet(parseInt(cadetId as string));
       } else {
         incidents = await storage.getRecentBehaviorIncidents(limit ? parseInt(limit as string) : undefined);
       }
@@ -266,7 +266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/mentorships/:id", authenticateToken, async (req, res) => {
     try {
       const mentorshipData = insertMentorshipSchema.partial().parse(req.body);
-      const mentorship = await storage.updateMentorship(req.params.id, mentorshipData);
+      const mentorship = await storage.updateMentorship(parseInt(req.params.id), mentorshipData);
       res.json(mentorship);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -276,11 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Development plan routes
   app.get("/api/development-plans/:cadetId", authenticateToken, async (req, res) => {
     try {
-      const plan = await storage.getDevelopmentPlanByCadet(req.params.cadetId);
-      if (!plan) {
-        return res.status(404).json({ message: "Development plan not found" });
-      }
-      res.json(plan);
+      const plans = await storage.getDevelopmentPlansByCadet(parseInt(req.params.cadetId));
+      res.json(plans);
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
@@ -299,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/development-plans/:id", authenticateToken, async (req, res) => {
     try {
       const planData = insertDevelopmentPlanSchema.partial().parse(req.body);
-      const plan = await storage.updateDevelopmentPlan(req.params.id, planData);
+      const plan = await storage.updateDevelopmentPlan(parseInt(req.params.id), planData);
       res.json(plan);
     } catch (error: any) {
       res.status(400).json({ message: error.message });
@@ -312,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { cadetId } = req.query;
       
       if (cadetId) {
-        const records = await storage.getAcademicRecordsByCadet(cadetId as string);
+        const records = await storage.getAcademicRecordsByCadet(parseInt(cadetId as string));
         res.json(records);
       } else {
         res.status(400).json({ message: "cadetId parameter is required" });

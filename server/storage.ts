@@ -1,4 +1,3 @@
-
 import { db } from "./db";
 import { eq, desc, and, count, sql } from "drizzle-orm";
 import {
@@ -59,14 +58,14 @@ export interface IStorage {
   createUser(insertUser: InsertUser): Promise<User>;
   updateUser(id: string, insertUser: Partial<InsertUser>): Promise<User>;
   getAllUsers(): Promise<User[]>;
-  
+
   // Cadet management
   getCadet(id: number): Promise<Cadet | undefined>;
   createCadet(insertCadet: InsertCadet): Promise<Cadet>;
   updateCadet(id: number, insertCadet: Partial<InsertCadet>): Promise<Cadet>;
   getAllCadets(): Promise<Cadet[]>;
   getCadetsByStatus(status: string): Promise<Cadet[]>;
-  
+
   // Behavior incidents
   getBehaviorIncident(id: number): Promise<BehaviorIncident | undefined>;
   createBehaviorIncident(insertIncident: InsertBehaviorIncident): Promise<BehaviorIncident>;
@@ -79,6 +78,8 @@ export interface IStorage {
   createFitnessAssessment(insertAssessment: InsertFitnessAssessment): Promise<FitnessAssessment>;
   updateFitnessAssessment(id: number, insertAssessment: Partial<InsertFitnessAssessment>): Promise<FitnessAssessment>;
   getFitnessAssessmentsByCadet(cadetId: number): Promise<FitnessAssessment[]>;
+  getAllFitnessAssessments(): Promise<FitnessAssessment[]>;
+  getLatestFitnessAssessmentByCadet(cadetId: number): Promise<FitnessAssessment | undefined>;
 
   // Mentorships
   getMentorship(id: number): Promise<Mentorship | undefined>;
@@ -190,7 +191,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users);
   }
 
-  // Cadet management
+  //Cadet management
   async getCadet(id: number): Promise<Cadet | undefined> {
     const [cadet] = await db.select().from(cadets).where(eq(cadets.id, id));
     return cadet || undefined;
@@ -256,6 +257,15 @@ export class DatabaseStorage implements IStorage {
 
   async getFitnessAssessmentsByCadet(cadetId: number): Promise<FitnessAssessment[]> {
     return await db.select().from(fitnessAssessments).where(eq(fitnessAssessments.cadetId, cadetId)).orderBy(desc(fitnessAssessments.assessmentDate));
+  }
+
+  async getAllFitnessAssessments(): Promise<FitnessAssessment[]> {
+    return await db.select().from(fitnessAssessments).orderBy(desc(fitnessAssessments.assessmentDate));
+  }
+
+  async getLatestFitnessAssessmentByCadet(cadetId: number): Promise<FitnessAssessment | undefined> {
+    const [assessment] = await db.select().from(fitnessAssessments).where(eq(fitnessAssessments.cadetId, cadetId)).orderBy(desc(fitnessAssessments.assessmentDate)).limit(1);
+    return assessment || undefined;
   }
 
   // Mentorships
