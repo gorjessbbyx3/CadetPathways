@@ -6,19 +6,19 @@
   .quick-action-card {
     @apply flex flex-col items-center p-4 bg-card border border-border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-navy-300;
   }
-  
+
   .quick-action-card:hover {
     transform: translateY(-2px);
   }
-  
+
   .stat-card {
     @apply bg-card rounded-xl border border-border p-6 shadow-sm hover:shadow-md transition-shadow duration-200;
   }
-  
+
   .nav-item-active {
     @apply flex items-center space-x-3 p-3 rounded-lg bg-navy-800 text-white font-medium;
   }
-  
+
   .nav-item-inactive {
     @apply flex items-center space-x-3 p-3 rounded-lg text-navy-300 hover:bg-navy-800 hover:text-white transition-colors;
   }
@@ -57,7 +57,7 @@
   --sidebar-accent-foreground: hsl(203.8863 88.2845% 53.1373%);
   --sidebar-border: hsl(205.0000 25.0000% 90.5882%);
   --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
-  
+
   /* Military Academy Color Variables */
   --navy-50: hsl(215 100% 97%);
   --navy-500: hsl(217 91% 60%);
@@ -65,16 +65,16 @@
   --navy-700: hsl(224 76% 48%);
   --navy-800: hsl(226 71% 40%);
   --navy-900: hsl(224 64% 33%);
-  
+
   --military-50: hsl(120 60% 97%);
   --military-500: hsl(142 71% 45%);
   --military-600: hsl(142 76% 36%);
   --military-700: hsl(142 72% 29%);
   --military-800: hsl(143 64% 24%);
   --military-900: hsl(144 61% 20%);
-  
+
   --academy-gold: hsl(42 96% 49%);
-  
+
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -124,14 +124,14 @@
   --sidebar-accent-foreground: hsl(203.7736 87.6033% 52.5490%);
   --sidebar-border: hsl(205.7143 15.7895% 26.0784%);
   --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
-  
+
   /* Dark mode military colors */
   --navy-50: hsl(215 20% 7%);
   --navy-900: hsl(215 100% 97%);
-  
+
   --military-50: hsl(120 20% 7%);
   --military-900: hsl(120 60% 97%);
-  
+
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
@@ -160,35 +160,35 @@
   .military-sidebar {
     background: linear-gradient(180deg, var(--navy-900) 0%, var(--navy-800) 100%);
   }
-  
+
   .academy-badge {
     background: linear-gradient(135deg, var(--academy-gold) 0%, hsl(42 80% 45%) 100%);
   }
-  
+
   .stat-card {
     @apply bg-white dark:bg-card rounded-xl shadow-sm border border-border p-6 transition-all duration-200 hover:shadow-md;
   }
-  
+
   .nav-item {
     @apply flex items-center space-x-3 p-3 rounded-lg transition-colors;
   }
-  
+
   .nav-item-active {
     @apply nav-item bg-navy-800 text-yellow-400;
   }
-  
+
   .nav-item-inactive {
     @apply nav-item hover:bg-navy-800 text-white;
   }
-  
+
   .quick-action-card {
     @apply flex flex-col items-center p-4 border border-border rounded-lg hover:border-primary hover:bg-accent transition-colors cursor-pointer;
   }
-  
+
   .fitness-progress-bar {
     @apply w-24 bg-muted rounded-full h-2 mt-1;
   }
-  
+
   .fitness-progress-fill {
     @apply h-2 rounded-full transition-all duration-300;
   }
