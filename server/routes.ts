@@ -33,6 +33,25 @@ const authenticateToken = async (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Database health check endpoint
+  app.get("/api/health/db", async (req, res) => {
+    try {
+      // Try to query the users table
+      const result = await storage.getAllUsers();
+      res.json({ 
+        status: "ok", 
+        message: "Database connection successful",
+        userCount: result.length 
+      });
+    } catch (error: any) {
+      res.status(500).json({ 
+        status: "error",
+        message: "Database connection failed",
+        error: error.message 
+      });
+    }
+  });
+
   // Setup route - create initial admin user from environment variables
   app.post("/api/setup/admin", async (req, res) => {
     try {
