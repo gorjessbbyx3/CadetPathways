@@ -171,7 +171,10 @@ export const mockTests = pgTable("mock_tests", {
   subject: text("subject").notNull(),
   instructorId: varchar("instructor_id").notNull().references(() => users.id),
   questions: jsonb("questions").notNull(), // Array of question objects
-  timeLimit: integer("time_limit"), // Minutes
+  timeLimit: integer("time_limit"), // Minutes (also called duration in UI)
+  totalQuestions: integer("total_questions"),
+  passingScore: integer("passing_score").default(70),
+  scheduledDate: timestamp("scheduled_date"),
   maxAttempts: integer("max_attempts").default(1),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -194,6 +197,7 @@ export const classDiaryEntries = pgTable("class_diary_entries", {
   id: serial("id").primaryKey(),
   date: date("date").notNull(),
   subject: text("subject").notNull(),
+  topic: text("topic").notNull(),
   instructorId: varchar("instructor_id").notNull().references(() => users.id),
   content: text("content").notNull(),
   homework: text("homework"),

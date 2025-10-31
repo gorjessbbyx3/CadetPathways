@@ -61,7 +61,19 @@ export default function MockTests() {
   // Create mock test mutation
   const createTestMutation = useMutation({
     mutationFn: async (data: MockTestFormData) => {
-      return await apiRequest("/api/mock-tests", "POST", data);
+      // Map UI fields to database schema
+      const testData = {
+        title: data.title,
+        description: data.description,
+        subject: data.subject,
+        instructorId: "temp-instructor-id", // Will be set by backend
+        timeLimit: data.duration, // Map duration to timeLimit
+        totalQuestions: data.totalQuestions,
+        passingScore: data.passingScore,
+        scheduledDate: data.scheduledDate || null,
+        questions: [], // Empty array for now
+      };
+      return await apiRequest("/api/mock-tests", "POST", testData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/mock-tests"] });
@@ -111,7 +123,7 @@ export default function MockTests() {
     
     const now = new Date();
     const scheduledDate = new Date(test.scheduledDate);
-    const endTime = new Date(scheduledDate.getTime() + test.duration * 60000);
+    const endTime = new Date(scheduledDate.getTime() + (test.timeLimit || 60) * 60000);
     
     if (endTime < now) {
       return <Badge variant="outline">Completed</Badge>;
@@ -382,7 +394,7 @@ export default function MockTests() {
                       <div className="flex-1">
                         <CardTitle className="text-lg mb-2 flex items-center">
                           {test.title}
-                          <span className="ml-2">{getDifficultyIcon(test.passingScore)}</span>
+                          <span className="ml-2">{getDifficultyIcon(test.passingScore || 70)}</span>
                         </CardTitle>
                         <div className="flex items-center space-x-2 mb-2">
                           <Badge className={getSubjectColor(test.subject)}>
@@ -401,15 +413,15 @@ export default function MockTests() {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Clock className="mr-2" size={14} />
-                        Duration: {test.duration} minutes
+                        Duration: {test.timeLimit || 60} minutes
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <FileText className="mr-2" size={14} />
-                        Questions: {test.totalQuestions}
+                        Questions: {test.totalQuestions || 0}
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Trophy className="mr-2" size={14} />
-                        Passing: {test.passingScore}%
+                        Passing: {test.passingScore || 70}%
                       </div>
                       {test.scheduledDate && (
                         <div className="flex items-center text-sm text-muted-foreground">

@@ -349,10 +349,10 @@ export default function ClassDiary() {
                             <CalendarDays className="mr-1" size={14} />
                             {formatDate(entry.date)}
                           </div>
-                          {entry.attendance && (
+                          {entry.attendees && Array.isArray(entry.attendees) && entry.attendees.length > 0 && (
                             <div className="flex items-center">
                               <Users className="mr-1" size={14} />
-                              {entry.attendance}
+                              {String(entry.attendees.length)} students
                             </div>
                           )}
                         </div>

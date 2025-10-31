@@ -11,39 +11,6 @@ interface Activity {
   mentorName?: string;
 }
 
-// Mock activities for now
-const mockActivities: Activity[] = [
-  {
-    id: '1',
-    type: 'fitness',
-    description: 'Cadet Rodriguez completed Physical Fitness Assessment with 95% score',
-    timestamp: '2 hours ago',
-    cadetName: 'Cadet Rodriguez',
-  },
-  {
-    id: '2',
-    type: 'mentorship',
-    description: 'New mentorship pairing: Staff Sgt. Kim assigned to Cadet Thompson',
-    timestamp: '4 hours ago',
-    cadetName: 'Cadet Thompson',
-    mentorName: 'Staff Sgt. Kim',
-  },
-  {
-    id: '3',
-    type: 'incident',
-    description: 'Behavior incident reported for Cadet Johnson - Late for formation',
-    timestamp: '6 hours ago',
-    cadetName: 'Cadet Johnson',
-  },
-  {
-    id: '4',
-    type: 'career',
-    description: 'Career pathway updated for Cadet Williams - Information Technology',
-    timestamp: '1 day ago',
-    cadetName: 'Cadet Williams',
-  },
-];
-
 const getActivityIcon = (type: string) => {
   switch (type) {
     case 'fitness': return Trophy;
@@ -65,8 +32,13 @@ const getActivityColor = (type: string) => {
 };
 
 export default function RecentActivities() {
-  // For now using mock data, replace with real API call
-  const activities = mockActivities;
+  const { data: activities = [], isLoading } = useQuery<Activity[]>({
+    queryKey: ["/api/activities"],
+    queryFn: async () => {
+      const response = await authenticatedFetch("/api/activities?limit=5");
+      return response.json();
+    },
+  });
 
   return (
     <div className="lg:col-span-2 bg-card rounded-xl shadow-sm border border-border">
@@ -79,8 +51,23 @@ export default function RecentActivities() {
         </div>
       </div>
       <div className="p-6">
-        <div className="space-y-4">
-          {activities.map((activity) => {
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-start space-x-4">
+                <div className="w-10 h-10 bg-muted animate-pulse rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+                  <div className="h-3 bg-muted animate-pulse rounded w-1/4" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : activities.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No recent activities</p>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((activity) => {
             const Icon = getActivityIcon(activity.type);
             const colorClass = getActivityColor(activity.type);
             
@@ -100,7 +87,8 @@ export default function RecentActivities() {
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

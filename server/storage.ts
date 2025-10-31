@@ -58,6 +58,7 @@ export interface IStorage {
   createUser(insertUser: InsertUser): Promise<User>;
   updateUser(id: string, insertUser: Partial<InsertUser>): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  getAllStaff(): Promise<User[]>;
 
   // Cadet management
   getCadet(id: number): Promise<Cadet | undefined>;
@@ -65,6 +66,7 @@ export interface IStorage {
   updateCadet(id: number, insertCadet: Partial<InsertCadet>): Promise<Cadet>;
   getAllCadets(): Promise<Cadet[]>;
   getCadetsByStatus(status: string): Promise<Cadet[]>;
+  searchCadets(query: string): Promise<Cadet[]>;
 
   // Behavior incidents
   getBehaviorIncident(id: number): Promise<BehaviorIncident | undefined>;
@@ -87,6 +89,7 @@ export interface IStorage {
   updateMentorship(id: number, insertMentorship: Partial<InsertMentorship>): Promise<Mentorship>;
   getMentorshipsByMentor(mentorId: string): Promise<Mentorship[]>;
   getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]>;
+  getActiveMentorships(): Promise<Mentorship[]>;
 
   // Development plans
   getDevelopmentPlan(id: number): Promise<DevelopmentPlan | undefined>;
@@ -115,12 +118,15 @@ export interface IStorage {
   createAcademicSchedule(insertSchedule: InsertAcademicSchedule): Promise<AcademicSchedule>;
   updateAcademicSchedule(id: number, insertSchedule: Partial<InsertAcademicSchedule>): Promise<AcademicSchedule>;
   getAcademicSchedulesByCadet(cadetId: number): Promise<AcademicSchedule[]>;
+  getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]>;
 
   // Assignments
   getAssignment(id: number): Promise<Assignment | undefined>;
   createAssignment(insertAssignment: InsertAssignment): Promise<Assignment>;
   updateAssignment(id: number, insertAssignment: Partial<InsertAssignment>): Promise<Assignment>;
   getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]>;
+  getAssignmentsByCadet(cadetId: number): Promise<Assignment[]>;
+  getAllAssignments(): Promise<Assignment[]>;
 
   // Assignment submissions
   getAssignmentSubmission(id: number): Promise<AssignmentSubmission | undefined>;
@@ -135,6 +141,7 @@ export interface IStorage {
   updateMockTest(id: number, insertTest: Partial<InsertMockTest>): Promise<MockTest>;
   getMockTestsByInstructor(instructorId: string): Promise<MockTest[]>;
   getActiveMockTests(): Promise<MockTest[]>;
+  getAllMockTests(): Promise<MockTest[]>;
 
   // Mock test attempts
   getMockTestAttempt(id: number): Promise<MockTestAttempt | undefined>;
@@ -191,6 +198,12 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(users);
   }
 
+  async getAllStaff(): Promise<User[]> {
+    return await db.select().from(users).where(
+      sql`${users.role} IN ('administrator', 'instructor', 'mentor')`
+    );
+  }
+
   //Cadet management
   async getCadet(id: number): Promise<Cadet | undefined> {
     const [cadet] = await db.select().from(cadets).where(eq(cadets.id, id));
@@ -213,6 +226,12 @@ export class DatabaseStorage implements IStorage {
 
   async getCadetsByStatus(status: string): Promise<Cadet[]> {
     return await db.select().from(cadets).where(eq(cadets.status, status));
+  }
+
+  async searchCadets(query: string): Promise<Cadet[]> {
+    return await db.select().from(cadets).where(
+      sql`${cadets.firstName} ILIKE ${'%' + query + '%'} OR ${cadets.lastName} ILIKE ${'%' + query + '%'}`
+    );
   }
 
   // Behavior incidents
@@ -290,6 +309,10 @@ export class DatabaseStorage implements IStorage {
 
   async getMentorshipsByCadet(cadetId: number): Promise<Mentorship[]> {
     return await db.select().from(mentorships).where(eq(mentorships.cadetId, cadetId));
+  }
+
+  async getActiveMentorships(): Promise<Mentorship[]> {
+    return await db.select().from(mentorships).where(eq(mentorships.status, 'active'));
   }
 
   // Development plans
@@ -382,6 +405,10 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(academicSchedules).where(eq(academicSchedules.cadetId, cadetId));
   }
 
+  async getAcademicSchedulesByDay(dayOfWeek: string): Promise<AcademicSchedule[]> {
+    return await db.select().from(academicSchedules).where(eq(academicSchedules.dayOfWeek, dayOfWeek));
+  }
+
   // Assignments
   async getAssignment(id: number): Promise<Assignment | undefined> {
     const [assignment] = await db.select().from(assignments).where(eq(assignments.id, id));
@@ -400,6 +427,16 @@ export class DatabaseStorage implements IStorage {
 
   async getAssignmentsByInstructor(instructorId: string): Promise<Assignment[]> {
     return await db.select().from(assignments).where(eq(assignments.instructorId, instructorId));
+  }
+
+  async getAssignmentsByCadet(cadetId: number): Promise<Assignment[]> {
+    return await db.select().from(assignments).where(
+      sql`${assignments.assignedToCadets} @> ${JSON.stringify([cadetId])}`
+    );
+  }
+
+  async getAllAssignments(): Promise<Assignment[]> {
+    return await db.select().from(assignments).orderBy(desc(assignments.dueDate));
   }
 
   // Assignment submissions
@@ -448,6 +485,10 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveMockTests(): Promise<MockTest[]> {
     return await db.select().from(mockTests).where(eq(mockTests.isActive, true));
+  }
+
+  async getAllMockTests(): Promise<MockTest[]> {
+    return await db.select().from(mockTests).orderBy(desc(mockTests.createdAt));
   }
 
   // Mock test attempts
