@@ -19,6 +19,7 @@ import AcademicTimetable from "@/pages/academic-timetable";
 import AssignmentManagement from "@/pages/assignment-management";
 import MockTests from "@/pages/mock-tests";
 import ClassDiary from "@/pages/class-diary";
+import AIInsights from "@/pages/ai-insights";
 
 function Router() {
   return (
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/assignment-management" component={AssignmentManagement} />
       <Route path="/mock-tests" component={MockTests} />
       <Route path="/class-diary" component={ClassDiary} />
+      <Route path="/ai-insights" component={AIInsights} />
       <Route component={NotFound} />
     </Switch>
   );

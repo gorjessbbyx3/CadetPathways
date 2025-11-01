@@ -10,7 +10,8 @@ import {
   GraduationCap, 
   Bus, 
   MessageSquare, 
-  BarChart, 
+  BarChart,
+  Brain,
   LogOut 
 } from "lucide-react";
 
@@ -24,6 +25,7 @@ const navigationItems = [
   { href: "/staff-management", icon: Bus, label: "Staff Management" },
   { href: "/communications", icon: MessageSquare, label: "Communications" },
   { href: "/analytics-reports", icon: BarChart, label: "Analytics & Reports" },
+  { href: "/ai-insights", icon: Brain, label: "AI Insights" },
 ];
 
 export default function SidebarNavigation() {

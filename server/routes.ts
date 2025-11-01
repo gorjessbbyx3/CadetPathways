@@ -917,6 +917,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI-powered endpoints
+  const { aiService } = await import('./ai-service');
+  const { profileAggregator } = await import('./profile-aggregator');
+
+  // Analyze individual cadet
+  app.get("/api/ai/analyze-cadet/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const profile = await profileAggregator.buildCadetProfile(cadetId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Cadet not found" });
+      }
+
+      const analysis = await aiService.analyzeCadet(profile);
+      res.json({
+        cadetId,
+        cadetName: `${profile.cadet.firstName} ${profile.cadet.lastName}`,
+        profile: {
+          academicTrend: profile.academicTrend,
+          fitnessTrend: profile.fitnessTrend,
+          behaviorScore: profile.behaviorScore,
+          engagementScore: profile.engagementScore,
+        },
+        ...analysis,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Recommend roommates
+  app.get("/api/ai/recommend-roommates/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const targetProfile = await profileAggregator.buildCadetProfile(cadetId);
+      
+      if (!targetProfile) {
+        return res.status(404).json({ message: "Cadet not found" });
+      }
+
+      const profiles = await profileAggregator.buildAllCadetProfiles();
+      const recommendations = await aiService.recommendRoommates(profiles, cadetId);
+      
+      res.json(recommendations);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Suggest mentors for a cadet
+  app.get("/api/ai/suggest-mentors/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const profile = await profileAggregator.buildCadetProfile(cadetId);
+      
+      if (!profile) {
+        return res.status(404).json({ message: "Cadet not found" });
+      }
+
+      const mentors = await storage.getAllStaff();
+      const recommendations = await aiService.suggestMentors(profile, mentors);
+      
+      res.json(recommendations);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Identify at-risk cadets
+  app.get("/api/ai/at-risk-cadets", authenticateToken, async (req, res) => {
+    try {
+      const profiles = await profileAggregator.buildAllCadetProfiles();
+      const alerts = await aiService.identifyAtRiskCadets(profiles);
+      
+      // Sort by urgency (highest first)
+      alerts.sort((a, b) => b.urgency - a.urgency);
+      
+      res.json(alerts);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
