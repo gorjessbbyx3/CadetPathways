@@ -78,10 +78,14 @@ export default function AIInsights() {
 
       <div className="p-6">
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-1/2">
+          <TabsList className="grid w-full grid-cols-3 lg:w-2/3">
             <TabsTrigger value="at-risk" data-testid="tab-at-risk">
               <AlertTriangle className="mr-2 h-4 w-4" />
               At-Risk Cadets
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" data-testid="tab-recommendations">
+              <Users className="mr-2 h-4 w-4" />
+              Recommendations
             </TabsTrigger>
             <TabsTrigger value="overview" data-testid="tab-overview">
               <TrendingUp className="mr-2 h-4 w-4" />
@@ -201,6 +205,54 @@ export default function AIInsights() {
                 </Card>
               ))
             )}
+          </TabsContent>
+
+          {/* Recommendations Tab */}
+          <TabsContent value="recommendations" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  AI-Powered Recommendations
+                </CardTitle>
+                <CardDescription>
+                  Intelligent suggestions for roommate placement and mentor assignments
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h4 className="font-semibold mb-3">Roommate Matching</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    AI analyzes behavioral compatibility, schedule alignment, personality indicators, and academic interests to suggest optimal roommate pairings.
+                  </p>
+                  <Button size="sm" data-testid="button-generate-roommate-recommendations">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Roommate Recommendations
+                  </Button>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="font-semibold mb-3">Mentor Assignment</h4>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Match cadets with mentors based on expertise-career alignment, past success rates, communication style compatibility, and shared interests.
+                  </p>
+                  <Button size="sm" variant="outline" data-testid="button-generate-mentor-recommendations">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Generate Mentor Recommendations
+                  </Button>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h4 className="font-semibold mb-3">How It Works</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>• Analyzes comprehensive cadet profiles including academic, fitness, and behavioral data</li>
+                    <li>• Evaluates compatibility factors such as schedules, interests, and communication styles</li>
+                    <li>• Provides confidence scores and explanations for each recommendation</li>
+                    <li>• Identifies potential concerns and suggests mitigation strategies</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Overview Tab */}
