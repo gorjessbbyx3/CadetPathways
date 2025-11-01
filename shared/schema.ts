@@ -244,6 +244,71 @@ export const parentGuardians = pgTable("parent_guardians", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Tasks for mentor operations and team coordination
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  cadetId: integer("cadet_id").references(() => cadets.id),
+  assignedToId: varchar("assigned_to_id").notNull().references(() => users.id),
+  createdById: varchar("created_by_id").notNull().references(() => users.id),
+  dueDate: timestamp("due_date"),
+  priority: text("priority").default("medium"), // low, medium, high, urgent
+  status: text("status").default("pending"), // pending, in_progress, completed, cancelled
+  category: text("category"), // meeting_followup, academic_support, behavioral_intervention, etc.
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Meeting logs for mentorship sessions
+export const meetingLogs = pgTable("meeting_logs", {
+  id: serial("id").primaryKey(),
+  mentorshipId: integer("mentorship_id").notNull().references(() => mentorships.id),
+  cadetId: integer("cadet_id").notNull().references(() => cadets.id),
+  mentorId: varchar("mentor_id").notNull().references(() => users.id),
+  meetingDate: timestamp("meeting_date").notNull(),
+  duration: integer("duration"), // minutes
+  location: text("location"),
+  topics: jsonb("topics"), // Array of topic strings
+  summary: text("summary"),
+  cadetMood: text("cadet_mood"), // positive, neutral, concerned, distressed
+  progressNotes: text("progress_notes"),
+  actionItems: jsonb("action_items"), // Array of action item objects
+  nextMeetingDate: timestamp("next_meeting_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Shared notes visible to entire team
+export const sharedNotes = pgTable("shared_notes", {
+  id: serial("id").primaryKey(),
+  cadetId: integer("cadet_id").notNull().references(() => cadets.id),
+  createdById: varchar("created_by_id").notNull().references(() => users.id),
+  noteType: text("note_type"), // general, concern, achievement, intervention, etc.
+  content: text("content").notNull(),
+  isUrgent: boolean("is_urgent").default(false),
+  visibility: text("visibility").default("all_staff"), // all_staff, mentors_only, admin_only
+  mentions: jsonb("mentions"), // Array of user IDs who are @mentioned
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notifications for smart alerts and task reminders
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // task_due, at_risk_alert, meeting_reminder, mention, etc.
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  relatedEntityType: text("related_entity_type"), // cadet, task, meeting, note
+  relatedEntityId: integer("related_entity_id"),
+  priority: text("priority").default("normal"), // low, normal, high, urgent
+  isRead: boolean("is_read").default(false),
+  actionUrl: text("action_url"), // URL to navigate to when clicking notification
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   behaviorIncidents: many(behaviorIncidents),
@@ -256,6 +321,11 @@ export const usersRelations = relations(users, ({ many }) => ({
   assignments: many(assignments),
   mockTests: many(mockTests),
   classDiaryEntries: many(classDiaryEntries),
+  tasksAssigned: many(tasks, { relationName: "assignedTasks" }),
+  tasksCreated: many(tasks, { relationName: "createdTasks" }),
+  meetingLogs: many(meetingLogs),
+  sharedNotes: many(sharedNotes),
+  notifications: many(notifications),
 }));
 
 export const cadetsRelations = relations(cadets, ({ many }) => ({
@@ -269,6 +339,9 @@ export const cadetsRelations = relations(cadets, ({ many }) => ({
   assignmentSubmissions: many(assignmentSubmissions),
   mockTestAttempts: many(mockTestAttempts),
   feeRecords: many(feeRecords),
+  tasks: many(tasks),
+  meetingLogs: many(meetingLogs),
+  sharedNotes: many(sharedNotes),
 }));
 
 export const behaviorIncidentsRelations = relations(behaviorIncidents, ({ one }) => ({
@@ -446,6 +519,56 @@ export const feeRecordsRelations = relations(feeRecords, ({ one }) => ({
   }),
 }));
 
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  cadet: one(cadets, {
+    fields: [tasks.cadetId],
+    references: [cadets.id],
+  }),
+  assignedTo: one(users, {
+    fields: [tasks.assignedToId],
+    references: [users.id],
+    relationName: "assignedTasks",
+  }),
+  createdBy: one(users, {
+    fields: [tasks.createdById],
+    references: [users.id],
+    relationName: "createdTasks",
+  }),
+}));
+
+export const meetingLogsRelations = relations(meetingLogs, ({ one }) => ({
+  mentorship: one(mentorships, {
+    fields: [meetingLogs.mentorshipId],
+    references: [mentorships.id],
+  }),
+  cadet: one(cadets, {
+    fields: [meetingLogs.cadetId],
+    references: [cadets.id],
+  }),
+  mentor: one(users, {
+    fields: [meetingLogs.mentorId],
+    references: [users.id],
+  }),
+}));
+
+export const sharedNotesRelations = relations(sharedNotes, ({ one }) => ({
+  cadet: one(cadets, {
+    fields: [sharedNotes.cadetId],
+    references: [cadets.id],
+  }),
+  createdBy: one(users, {
+    fields: [sharedNotes.createdById],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
 export const insertCommunicationSchema = createInsertSchema(communications).omit({
   id: true,
   sentAt: true,
@@ -494,6 +617,29 @@ export const insertFeeRecordSchema = createInsertSchema(feeRecords).omit({
   createdAt: true,
 });
 
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMeetingLogSchema = createInsertSchema(meetingLogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSharedNoteSchema = createInsertSchema(sharedNotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -527,3 +673,11 @@ export type ClassDiaryEntry = typeof classDiaryEntries.$inferSelect;
 export type InsertClassDiaryEntry = z.infer<typeof insertClassDiaryEntrySchema>;
 export type FeeRecord = typeof feeRecords.$inferSelect;
 export type InsertFeeRecord = z.infer<typeof insertFeeRecordSchema>;
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type MeetingLog = typeof meetingLogs.$inferSelect;
+export type InsertMeetingLog = z.infer<typeof insertMeetingLogSchema>;
+export type SharedNote = typeof sharedNotes.$inferSelect;
+export type InsertSharedNote = z.infer<typeof insertSharedNoteSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

@@ -15,6 +15,13 @@
       "when": 1761954512718,
       "tag": "0001_concerned_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761958415936,
+      "tag": "0002_fuzzy_excalibur",
+      "breakpoints": true
     }
   ]
 }
