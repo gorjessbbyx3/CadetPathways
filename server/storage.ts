@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, desc, and, count, sql } from "drizzle-orm";
+import { eq, desc, and, count, sql, gte, lte } from "drizzle-orm";
 import {
   users,
   cadets,
@@ -17,6 +17,10 @@ import {
   mockTestAttempts,
   classDiaryEntries,
   feeRecords,
+  tasks,
+  meetingLogs,
+  sharedNotes,
+  notifications,
   type User,
   type InsertUser,
   type Cadet,
@@ -49,6 +53,14 @@ import {
   type InsertClassDiaryEntry,
   type FeeRecord,
   type InsertFeeRecord,
+  type Task,
+  type InsertTask,
+  type MeetingLog,
+  type InsertMeetingLog,
+  type SharedNote,
+  type InsertSharedNote,
+  type Notification,
+  type InsertNotification,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -162,6 +174,42 @@ export interface IStorage {
   updateFeeRecord(id: number, feeRecord: Partial<InsertFeeRecord>): Promise<FeeRecord>;
   getFeeRecordsByCadet(cadetId: number): Promise<FeeRecord[]>;
   getOverdueFees(): Promise<FeeRecord[]>;
+
+  // Tasks
+  getTask(id: number): Promise<Task | undefined>;
+  createTask(insertTask: InsertTask): Promise<Task>;
+  updateTask(id: number, insertTask: Partial<InsertTask>): Promise<Task>;
+  getTasksByAssignee(userId: string): Promise<Task[]>;
+  getTasksByCadet(cadetId: number): Promise<Task[]>;
+  getTasksDueToday(userId: string): Promise<Task[]>;
+  getOverdueTasks(userId: string): Promise<Task[]>;
+  getPendingTasks(userId: string): Promise<Task[]>;
+
+  // Meeting logs
+  getMeetingLog(id: number): Promise<MeetingLog | undefined>;
+  createMeetingLog(insertLog: InsertMeetingLog): Promise<MeetingLog>;
+  updateMeetingLog(id: number, insertLog: Partial<InsertMeetingLog>): Promise<MeetingLog>;
+  getMeetingLogsByMentor(mentorId: string): Promise<MeetingLog[]>;
+  getMeetingLogsByCadet(cadetId: number): Promise<MeetingLog[]>;
+  getMeetingLogsByMentorship(mentorshipId: number): Promise<MeetingLog[]>;
+  getRecentMeetingLogs(userId: string, limit?: number): Promise<MeetingLog[]>;
+
+  // Shared notes
+  getSharedNote(id: number): Promise<SharedNote | undefined>;
+  createSharedNote(insertNote: InsertSharedNote): Promise<SharedNote>;
+  updateSharedNote(id: number, insertNote: Partial<InsertSharedNote>): Promise<SharedNote>;
+  getSharedNotesByCadet(cadetId: number): Promise<SharedNote[]>;
+  getRecentSharedNotes(limit?: number): Promise<SharedNote[]>;
+  getUrgentNotes(): Promise<SharedNote[]>;
+
+  // Notifications
+  getNotification(id: number): Promise<Notification | undefined>;
+  createNotification(insertNotification: InsertNotification): Promise<Notification>;
+  updateNotification(id: number, insertNotification: Partial<InsertNotification>): Promise<Notification>;
+  getNotificationsByUser(userId: string): Promise<Notification[]>;
+  getUnreadNotifications(userId: string): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<Notification>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
 
   // Dashboard statistics
   getDashboardStats(): Promise<{
@@ -558,6 +606,157 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(feeRecords).where(and(
       eq(feeRecords.status, 'pending'),
       sql`${feeRecords.dueDate} < CURRENT_DATE`
+    ));
+  }
+
+  // Tasks
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task || undefined;
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(insertTask).returning();
+    return task;
+  }
+
+  async updateTask(id: number, insertTask: Partial<InsertTask>): Promise<Task> {
+    const [task] = await db.update(tasks).set({ ...insertTask, updatedAt: new Date() }).where(eq(tasks.id, id)).returning();
+    return task;
+  }
+
+  async getTasksByAssignee(userId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.assignedToId, userId)).orderBy(desc(tasks.dueDate));
+  }
+
+  async getTasksByCadet(cadetId: number): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.cadetId, cadetId)).orderBy(desc(tasks.createdAt));
+  }
+
+  async getTasksDueToday(userId: string): Promise<Task[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    return await db.select().from(tasks).where(and(
+      eq(tasks.assignedToId, userId),
+      gte(tasks.dueDate, today),
+      lte(tasks.dueDate, tomorrow)
+    )).orderBy(tasks.priority);
+  }
+
+  async getOverdueTasks(userId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(and(
+      eq(tasks.assignedToId, userId),
+      sql`${tasks.dueDate} < CURRENT_DATE`,
+      sql`${tasks.status} != 'completed'`
+    )).orderBy(tasks.dueDate);
+  }
+
+  async getPendingTasks(userId: string): Promise<Task[]> {
+    return await db.select().from(tasks).where(and(
+      eq(tasks.assignedToId, userId),
+      eq(tasks.status, 'pending')
+    )).orderBy(desc(tasks.priority), tasks.dueDate);
+  }
+
+  // Meeting logs
+  async getMeetingLog(id: number): Promise<MeetingLog | undefined> {
+    const [log] = await db.select().from(meetingLogs).where(eq(meetingLogs.id, id));
+    return log || undefined;
+  }
+
+  async createMeetingLog(insertLog: InsertMeetingLog): Promise<MeetingLog> {
+    const [log] = await db.insert(meetingLogs).values(insertLog).returning();
+    return log;
+  }
+
+  async updateMeetingLog(id: number, insertLog: Partial<InsertMeetingLog>): Promise<MeetingLog> {
+    const [log] = await db.update(meetingLogs).set({ ...insertLog, updatedAt: new Date() }).where(eq(meetingLogs.id, id)).returning();
+    return log;
+  }
+
+  async getMeetingLogsByMentor(mentorId: string): Promise<MeetingLog[]> {
+    return await db.select().from(meetingLogs).where(eq(meetingLogs.mentorId, mentorId)).orderBy(desc(meetingLogs.meetingDate));
+  }
+
+  async getMeetingLogsByCadet(cadetId: number): Promise<MeetingLog[]> {
+    return await db.select().from(meetingLogs).where(eq(meetingLogs.cadetId, cadetId)).orderBy(desc(meetingLogs.meetingDate));
+  }
+
+  async getMeetingLogsByMentorship(mentorshipId: number): Promise<MeetingLog[]> {
+    return await db.select().from(meetingLogs).where(eq(meetingLogs.mentorshipId, mentorshipId)).orderBy(desc(meetingLogs.meetingDate));
+  }
+
+  async getRecentMeetingLogs(userId: string, limit: number = 10): Promise<MeetingLog[]> {
+    return await db.select().from(meetingLogs).where(eq(meetingLogs.mentorId, userId)).orderBy(desc(meetingLogs.meetingDate)).limit(limit);
+  }
+
+  // Shared notes
+  async getSharedNote(id: number): Promise<SharedNote | undefined> {
+    const [note] = await db.select().from(sharedNotes).where(eq(sharedNotes.id, id));
+    return note || undefined;
+  }
+
+  async createSharedNote(insertNote: InsertSharedNote): Promise<SharedNote> {
+    const [note] = await db.insert(sharedNotes).values(insertNote).returning();
+    return note;
+  }
+
+  async updateSharedNote(id: number, insertNote: Partial<InsertSharedNote>): Promise<SharedNote> {
+    const [note] = await db.update(sharedNotes).set({ ...insertNote, updatedAt: new Date() }).where(eq(sharedNotes.id, id)).returning();
+    return note;
+  }
+
+  async getSharedNotesByCadet(cadetId: number): Promise<SharedNote[]> {
+    return await db.select().from(sharedNotes).where(eq(sharedNotes.cadetId, cadetId)).orderBy(desc(sharedNotes.createdAt));
+  }
+
+  async getRecentSharedNotes(limit: number = 20): Promise<SharedNote[]> {
+    return await db.select().from(sharedNotes).orderBy(desc(sharedNotes.createdAt)).limit(limit);
+  }
+
+  async getUrgentNotes(): Promise<SharedNote[]> {
+    return await db.select().from(sharedNotes).where(eq(sharedNotes.isUrgent, true)).orderBy(desc(sharedNotes.createdAt));
+  }
+
+  // Notifications
+  async getNotification(id: number): Promise<Notification | undefined> {
+    const [notification] = await db.select().from(notifications).where(eq(notifications.id, id));
+    return notification || undefined;
+  }
+
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values(insertNotification).returning();
+    return notification;
+  }
+
+  async updateNotification(id: number, insertNotification: Partial<InsertNotification>): Promise<Notification> {
+    const [notification] = await db.update(notifications).set(insertNotification).where(eq(notifications.id, id)).returning();
+    return notification;
+  }
+
+  async getNotificationsByUser(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt));
+  }
+
+  async getUnreadNotifications(userId: string): Promise<Notification[]> {
+    return await db.select().from(notifications).where(and(
+      eq(notifications.userId, userId),
+      eq(notifications.isRead, false)
+    )).orderBy(desc(notifications.priority), desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification> {
+    const [notification] = await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, id)).returning();
+    return notification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db.update(notifications).set({ isRead: true }).where(and(
+      eq(notifications.userId, userId),
+      eq(notifications.isRead, false)
     ));
   }
 
