@@ -2,6 +2,16 @@
 
 This is a full-stack Military Academy Management System built for the Hawaii National Guard Youth Challenge Academy. The system provides comprehensive management capabilities for cadets, staff, behavior tracking, physical fitness assessments, mentorship programs, career pathways, communications, and analytics reporting. It features a modern React frontend with TypeScript, a Node.js/Express backend, and PostgreSQL database with Drizzle ORM.
 
+# Recent Changes
+
+## November 2025: Mentor Operations Hub
+- **Added Mentor Dashboard**: Comprehensive daily operations center for mentors with task tracking, meeting logs, team notes, and notifications
+- **New Database Tables**: Added `tasks`, `meeting_logs`, `shared_notes`, and `notifications` tables for mentor workflow management
+- **Team Collaboration**: Built shared notes system to eliminate information silos and enable team-wide visibility of cadet progress
+- **Daily Action Center**: Task management system with priority levels, due dates, and status tracking per cadet
+- **Meeting Logs**: Structured session recording with cadet mood tracking and duration logging
+- **Quick Actions**: Rapid data entry dialogs for logging tasks, meetings, and notes during busy days
+
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -36,6 +46,10 @@ The system uses a comprehensive relational schema with the following core entiti
 - **Academic Records**: Academic performance and achievement tracking
 - **Communications**: Message system for announcements and notifications
 - **Parent Guardians**: Family relationship management
+- **Tasks**: Mentor task management with priority, status, due dates, and cadet assignment
+- **Meeting Logs**: Session recordings with duration, mood tracking, and meeting summaries
+- **Shared Notes**: Team-wide cadet notes for collaboration and information sharing
+- **Notifications**: System notifications for mentors and staff
 
 ## Key Architectural Decisions
 - **Monorepo Structure**: Single repository with client, server, and shared code organization
