@@ -7,7 +7,8 @@ import {
   insertAcademicRecordSchema, insertCommunicationSchema, insertParentGuardianSchema,
   insertAcademicScheduleSchema, insertAssignmentSchema, insertAssignmentSubmissionSchema,
   insertMockTestSchema, insertMockTestAttemptSchema, insertClassDiaryEntrySchema,
-  insertFeeRecordSchema
+  insertFeeRecordSchema, insertTaskSchema, insertMeetingLogSchema, insertSharedNoteSchema,
+  insertNotificationSchema
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -996,6 +997,298 @@ export async function registerRoutes(app: Express): Promise<Server> {
       alerts.sort((a, b) => b.urgency - a.urgency);
       
       res.json(alerts);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // Tasks
+  app.get("/api/tasks", authenticateToken, async (req, res) => {
+    try {
+      const tasks = await storage.getTasksByAssignee(req.user.userId);
+      res.json(tasks);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/tasks/today", authenticateToken, async (req, res) => {
+    try {
+      const tasks = await storage.getTasksDueToday(req.user.userId);
+      res.json(tasks);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/tasks/overdue", authenticateToken, async (req, res) => {
+    try {
+      const tasks = await storage.getOverdueTasks(req.user.userId);
+      res.json(tasks);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/tasks/pending", authenticateToken, async (req, res) => {
+    try {
+      const tasks = await storage.getPendingTasks(req.user.userId);
+      res.json(tasks);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/tasks/cadet/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const tasks = await storage.getTasksByCadet(cadetId);
+      res.json(tasks);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/tasks/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const task = await storage.getTask(id);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      res.json(task);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/tasks", authenticateToken, async (req, res) => {
+    try {
+      const taskData = insertTaskSchema.parse(req.body);
+      const task = await storage.createTask(taskData);
+      res.status(201).json(task);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/tasks/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const taskData = insertTaskSchema.partial().parse(req.body);
+      const task = await storage.updateTask(id, taskData);
+      res.json(task);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Meeting Logs
+  app.get("/api/meeting-logs", authenticateToken, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const logs = await storage.getRecentMeetingLogs(req.user.userId, limit);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/meeting-logs/mentor/:id", authenticateToken, async (req, res) => {
+    try {
+      const mentorId = req.params.id;
+      const logs = await storage.getMeetingLogsByMentor(mentorId);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/meeting-logs/cadet/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const logs = await storage.getMeetingLogsByCadet(cadetId);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/meeting-logs/mentorship/:id", authenticateToken, async (req, res) => {
+    try {
+      const mentorshipId = parseInt(req.params.id);
+      const logs = await storage.getMeetingLogsByMentorship(mentorshipId);
+      res.json(logs);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/meeting-logs/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const log = await storage.getMeetingLog(id);
+      if (!log) {
+        return res.status(404).json({ message: "Meeting log not found" });
+      }
+      res.json(log);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/meeting-logs", authenticateToken, async (req, res) => {
+    try {
+      const logData = insertMeetingLogSchema.parse(req.body);
+      const log = await storage.createMeetingLog(logData);
+      res.status(201).json(log);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/meeting-logs/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const logData = insertMeetingLogSchema.partial().parse(req.body);
+      const log = await storage.updateMeetingLog(id, logData);
+      res.json(log);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Shared Notes
+  app.get("/api/shared-notes", authenticateToken, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const notes = await storage.getRecentSharedNotes(limit);
+      res.json(notes);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/shared-notes/urgent", authenticateToken, async (req, res) => {
+    try {
+      const notes = await storage.getUrgentNotes();
+      res.json(notes);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/shared-notes/cadet/:id", authenticateToken, async (req, res) => {
+    try {
+      const cadetId = parseInt(req.params.id);
+      const notes = await storage.getSharedNotesByCadet(cadetId);
+      res.json(notes);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/shared-notes/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const note = await storage.getSharedNote(id);
+      if (!note) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+      res.json(note);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/shared-notes", authenticateToken, async (req, res) => {
+    try {
+      const noteData = insertSharedNoteSchema.parse(req.body);
+      const note = await storage.createSharedNote(noteData);
+      res.status(201).json(note);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/shared-notes/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const noteData = insertSharedNoteSchema.partial().parse(req.body);
+      const note = await storage.updateSharedNote(id, noteData);
+      res.json(note);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  // Notifications
+  app.get("/api/notifications", authenticateToken, async (req, res) => {
+    try {
+      const notifications = await storage.getNotificationsByUser(req.user.userId);
+      res.json(notifications);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/notifications/unread", authenticateToken, async (req, res) => {
+    try {
+      const notifications = await storage.getUnreadNotifications(req.user.userId);
+      res.json(notifications);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/notifications/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notification = await storage.getNotification(id);
+      if (!notification) {
+        return res.status(404).json({ message: "Notification not found" });
+      }
+      res.json(notification);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/notifications", authenticateToken, async (req, res) => {
+    try {
+      const notificationData = insertNotificationSchema.parse(req.body);
+      const notification = await storage.createNotification(notificationData);
+      res.status(201).json(notification);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/notifications/:id", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notificationData = insertNotificationSchema.partial().parse(req.body);
+      const notification = await storage.updateNotification(id, notificationData);
+      res.json(notification);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(id);
+      res.json(notification);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/notifications/mark-all-read", authenticateToken, async (req, res) => {
+    try {
+      await storage.markAllNotificationsAsRead(req.user.userId);
+      res.json({ message: "All notifications marked as read" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }
