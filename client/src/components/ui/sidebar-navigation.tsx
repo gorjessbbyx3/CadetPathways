@@ -12,6 +12,7 @@ import {
   MessageSquare, 
   BarChart,
   Brain,
+  Target,
   LogOut 
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ const navigationItems = [
   { href: "/behavior-tracking", icon: ClipboardList, label: "Behavior Tracking" },
   { href: "/physical-fitness", icon: Dumbbell, label: "Physical Fitness" },
   { href: "/mentorship-program", icon: Handshake, label: "Mentorship Program" },
+  { href: "/mentor-dashboard", icon: Target, label: "Mentor Operations" },
   { href: "/career-pathways", icon: GraduationCap, label: "Career Pathways" },
   { href: "/staff-management", icon: Bus, label: "Staff Management" },
   { href: "/communications", icon: MessageSquare, label: "Communications" },

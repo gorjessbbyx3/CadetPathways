@@ -20,6 +20,7 @@ import AssignmentManagement from "@/pages/assignment-management";
 import MockTests from "@/pages/mock-tests";
 import ClassDiary from "@/pages/class-diary";
 import AIInsights from "@/pages/ai-insights";
+import MentorDashboard from "@/pages/mentor-dashboard";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/mock-tests" component={MockTests} />
       <Route path="/class-diary" component={ClassDiary} />
       <Route path="/ai-insights" component={AIInsights} />
+      <Route path="/mentor-dashboard" component={MentorDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
